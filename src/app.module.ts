@@ -1,21 +1,25 @@
 import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TechnicalSamplesModule } from './technical-samples/technical-samples.module';
-
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { ChemicalSamplesModule } from './chemical-samples/chemical-samples.module';
+import { ChemicalSample } from './chemical-samples/entities/chemical-sample.entity';
+import { User } from './chemical-samples/entities/user.entity';
+import { SampleLike } from './chemical-samples/entities/sample-like.entity';
 
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'chemistry_wad1',
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'chemistry_db',
+      entities: [ChemicalSample, User, SampleLike],
+      synchronize: true,
     }),
-    TechnicalSamplesModule,
+    ChemicalSamplesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

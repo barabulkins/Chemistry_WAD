@@ -11,49 +11,85 @@
     <div class="content-area add-page">
       <h1 class="add-header">Новый образец</h1>
       
-      {{#if sample}}
-      <form>
-        <div class="form-section">
-          <h3>Медиа</h3>
-          <div class="form-group">
-            <label>Изображение (файл)</label>
-            <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px;">
-              Превью изображения
+      {{#if hasDraft}}
+        <!-- Черновик найден — показать форму публикации -->
+        <form method="POST" action="/technical-samples/publish">
+          <div class="form-section">
+            <h3>Медиа</h3>
+            <div class="form-group">
+              <label>Изображение (файл)</label>
+              <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px; overflow: hidden;">
+                <img src="{{#if sample.image_url}}{{sample.image_url}}{{else}}/default.jpg{{/if}}" alt="Превью" style="max-width: 100%; max-height: 100%; object-fit: cover;" onerror="this.src='/default.jpg'">
+              </div>
+              <input type="file" class="form-control" name="image" accept="image/*" disabled>
+              <small style="color: #999;">Загрузка файлов недоступна в этой версии</small>
             </div>
-            <input type="file" class="form-control" name="image" accept="image/*">
-          </div>
-          <div class="form-group">
-            <label>Видео (файл)</label>
-            <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px;">
-              Превью видео
+            <div class="form-group">
+              <label>Видео (файл)</label>
+              <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px; overflow: hidden;">
+                <video src="{{#if sample.video_url}}{{sample.video_url}}{{else}}/default.mp4{{/if}}" style="max-width: 100%; max-height: 100%;" muted></video>
+              </div>
+              <input type="file" class="form-control" name="video" accept="video/*" disabled>
+              <small style="color: #999;">Загрузка файлов недоступна в этой версии</small>
             </div>
-            <input type="file" class="form-control" name="video" accept="video/*">
           </div>
-        </div>
 
-        <div class="form-section">
-          <h3>Описание и Параметры</h3>
-          <div class="form-group">
-            <label>Название</label>
-            <input type="text" class="form-control" name="title" value="{{sample.title}}">
+          <div class="form-section">
+            <h3>Описание и Параметры</h3>
+            <div class="form-group">
+              <label>Название</label>
+              <input type="text" class="form-control" name="title" value="{{sample.title}}">
+            </div>
+            <div class="form-group">
+              <label>Краткое описание</label>
+              <textarea class="form-control" name="description" rows="3" required placeholder="Введите описание образца">{{sample.description}}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Массовая доля примесей (%, в 1 кг образца)</label>
+              <input type="number" step="0.1" class="form-control" name="impurities_percent" value="{{sample.impurities_percent}}" required>
+            </div>
+            <div class="form-group">
+              <label>Выделившийся газ (мл из 1 кг)</label>
+              <input type="number" class="form-control" name="gas_volume" value="{{sample.gas_volume}}" required>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Описание</label>
-            <textarea class="form-control" name="description" rows="3">{{sample.description}}</textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Массовая доля примесей (%, в 1 кг образца)</label>
-            <input type="number" step="0.1" class="form-control" name="impurities_percent" value="{{sample.impurities_percent}}">
-          </div>
-          <div class="form-group">
-            <label>Выделившийся газ (мл из 1 кг)</label>
-            <input type="number" class="form-control" name="gas_volume" value="{{sample.gas_volume}}">
-          </div>
-        </div>
-      </form>
+
+          <button type="submit" class="search-btn" style="width: 100%; padding: 14px; font-size: 16px; background: var(--primary); color: white;">Опубликовать</button>
+        </form>
       {{else}}
-        <p>Черновик не найден</p>
+        <!-- Черновика нет — форма создания -->
+        <form method="POST" action="/technical-samples/draft">
+          <div class="form-section">
+            <h3>Медиа</h3>
+            <div class="form-group">
+              <label>Изображение (файл)</label>
+              <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px;">
+                Превью изображения
+              </div>
+              <input type="file" class="form-control" name="image" accept="image/*" disabled>
+              <small style="color: #999;">Загрузка файлов недоступна в этой версии</small>
+            </div>
+            <div class="form-group">
+              <label>Видео (файл)</label>
+              <div style="width: 100%; height: 150px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #999; border-radius: 10px; font-size: 14px;">
+                Превью видео
+              </div>
+              <input type="file" class="form-control" name="video" accept="video/*" disabled>
+              <small style="color: #999;">Загрузка файлов недоступна в этой версии</small>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Основная информация</h3>
+            <div class="form-group">
+              <label>Название</label>
+              <input type="text" class="form-control" name="title" required placeholder="Введите название образца">
+            </div>
+          </div>
+
+          <button type="submit" class="search-btn" style="width: 100%; padding: 14px; font-size: 16px; background: var(--primary); color: white;">Далее</button>
+        </form>
       {{/if}}
     </div>
     

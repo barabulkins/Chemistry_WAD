@@ -1,0 +1,364 @@
+﻿
+LineNumber Line                                                                                            
+---------- ----                                                                                            
+         4 	"name": "Untitled",                                                                            
+        12 			"name": "ER диаграмма",                                                                      
+        20 					"name": "ER диаграмма",                                                                    
+      1535 					"name": "Разработка",                                                                      
+      1601 							"name": "Tag1",                                                                          
+      1612 							"name": "Id",                                                                            
+      1623 							"name": "Статус",                                                                        
+      1633 							"name": "Фото",                                                                          
+      1644 							"name": "Название",                                                                      
+      1654 							"name": "Описание",                                                                      
+      1664 							"name": "Картинка группы",                                                               
+      1674 							"name": "Факультет",                                                                     
+      1682 									"name": "Tag1",                                                                        
+      1695 							"name": "Курс",                                                                          
+      1705 							"name": "Вариант обучения",                                                              
+      1715 							"name": "Id факультета",                                                                 
+      1725 							"name": "Год начала обучения",                                                           
+      1735 							"name": "Год конца обучения",                                                            
+      1745 							"name": "Электрическая мощность",                                                        
+      1755 							"name": "Максимальная плотность потока быстрых нейтронов",                               
+      1765 							"name": "Цена",                                                                          
+      1775 							"name": "Средняя энергия нейтронов",                                                     
+      1785 							"name": "Продолжительность микрокампании",                                               
+      1795 							"name": "Время между микрокомпаниями",                                                   
+      1805 							"name": "Год смерти",                                                                    
+      1817 					"name": "Сервисы",                                                                         
+      1855 							"name": "Tag1",                                                                          
+      1866 							"name": "Id",                                                                            
+      1877 							"name": "Статус",                                                                        
+      1887 							"name": "Дата создания",                                                                 
+      1897 							"name": "Дата формирования",                                                             
+      1908 							"name": "Дата завершения",                                                               
+      1919 							"name": "Id сервисчика",                                                                 
+      1930 							"name": "Id сотрудника",                                                                 
+      1941 							"name": "Название",                                                                      
+      1952 							"name": "ID преподавателя FK",                                                           
+      1962 							"name": "Время начала",                                                                  
+      1972 							"name": "Время конца",                                                                   
+      1982 							"name": "Описание",                                                                      
+      1993 							"name": "Год",                                                                           
+      2004 							"name": "Страна",                                                                        
+      2014 							"name": "Дата открытия",                                                                 
+      2022 									"name": "Tag1",                                                                        
+      2035 							"name": "Семестр",                                                                       
+      2045 							"name": "Помещение",                                                                     
+      2055 							"name": "Время проведения",                                                              
+      2065 							"name": "ТЗ",                                                                            
+      2076 							"name": "Дата",                                                                          
+      2088 					"name": "м-м",                                                                             
+      2096 							"name": "Id",                                                                            
+      2107 							"name": "Id",                                                                            
+      2118 							"name": "Id сервиса",                                                                    
+      2130 							"name": "Id разработки",                                                                 
+      2142 							"name": "Комментарий",                                                                   
+      2153 					"name": "Пользователь",                                                                    
+      2220 							"name": "Логин",                                                                         
+      2230 							"name": "Пароль",                                                                        
+      2238 									"name": "Tag1",                                                                        
+      2251 							"name": "id",                                                                            
+      2262 							"name": "username",                                                                      
+      2272 							"name": "email",                                                                         
+      2282 							"name": "password",                                                                      
+      2292 							"name": "is_staff",                                                                      
+      2302 							"name": "is_active",                                                                     
+      2311 							"name": "is_superuser",                                                                  
+      2321 							"name": "date_joined",                                                                   
+      2331 							"name": "last_login",                                                                    
+      2341 							"name": "first_name",                                                                    
+      2351 							"name": "last_name",                                                                     
+      2365 			"name": "Диаграмма бэкенда",                                                                 
+      2373 					"name": "Main",                                                                            
+      9473 					"name": "Бэкэнд",                                                                          
+      9481 							"name": "Домен пользователей",                                                           
+      9530 									"name": "POST api/login"                                                               
+      9538 									"name": "POST api/register"                                                            
+      9546 									"name": "PUT api/update_profile"                                                       
+      9554 									"name": "POST api/check"                                                               
+      9562 									"name": "POST api/logout"                                                              
+      9572 							"name": "Домен разработок",                                                              
+      9647 									"name": "GET api/developments/"                                                        
+      9655 									"name": "GET api/developments/<int:pk>/"                                               
+      9663 									"name": "POST api/developments/create/"                                                
+      9671 									"name": "PUT api/developments/<int:pk>/update/"                                        
+      9679 									"name": "DELETE api/developments/<int:pk>/delete/"                                     
+      9687 									"name": "POST api/developments/<int:pk>/add_to_service/"                               
+      9695 									"name": "PUT api/developments/<int:pk>/update_image/"                                  
+      9705 							"name": "Домен сервисов",                                                                
+      9793 									"name": "GET api/services/"                                                            
+      9801 									"name": "GET api/services/<int:pk>/"                                                   
+      9809 									"name": "PUT api/services/<int:pk>/update/"                                            
+      9817 									"name": "PUT api/services/<int:pk>/update_status_user/"                                
+      9825 									"name": "PUT api/services/<int:pk>/update_status_admin/"                               
+      9833 									"name": "DELETE api/services/<int:service_id>/delete/"                                 
+      9841 									"name": "PUT api/services/<int:service_id>/update/<int:development_id>/"               
+      9851 							"name": "Домен м-м",                                                                     
+      9952 									"name": "DELETE api/services/<int:id>/delete_development/<int:id>/"                    
+      9960 									"name": "PUT api/services/<int:id>/update/<int:id>/"                                   
+      9972 					"name": "Модели",                                                                          
+      9980 							"name": "Сервис",                                                                        
+     10108 							"name": "Разработка",                                                                    
+     10157 							"name": "Пользователь",                                                                  
+     10193 							"name": "м-м",                                                                           
+     10257 					"name": "База данных",                                                                     
+     10265 							"name": "Таблица сервисы",                                                               
+     10329 							"name": "Таблица м-м",                                                                   
+     10366 							"name": "Таблица пользователи"                                                           
+     10374 							"name": "Таблица разработка",                                                            
+     10413 					"name": "API авторизация"                                                                  
+     10421 					"name": "Postman",                                                                         
+     10483 					"name": "API пользователей"                                                                
+     10491 					"name": "API сервисов"                                                                     
+     10499 					"name": "API разработок"                                                                   
+     10507 					"name": "API м-м"                                                                          
+     10517 			"name": "Диаграмма классов",                                                                 
+     10525 					"name": "Main",                                                                            
+     16344 					"name": "Набор методов авторизации"                                                        
+     16352 					"name": "API пользователей"                                                                
+     16360 					"name": "Фронтэнд",                                                                        
+     16368 							"name": "Страница со списком разработок",                                                
+     16391 							"name": "Страница чернового сервиса",                                                    
+     16427 							"name": "Страница аутентификации ",                                                      
+     16450 							"name": "Страница регистрации",                                                          
+     16473 							"name": "Страница с историей сервисов",                                                  
+     16509 							"name": "Страница со списком факультетов"                                                
+     16517 							"name": "Страница одного разработки",                                                    
+     16540 							"name": "Страница с таблицей разработок",                                                
+     16563 							"name": "Страница одного открытия",                                                      
+     16586 							"name": "Главная"                                                                        
+     16594 							"name": "403"                                                                            
+     16604 					"name": "API сервисов"                                                                     
+     16612 					"name": "API разработок"                                                                   
+     16620 					"name": "Страница добавления и редактирования разработки",                                 
+     16643 					"name": "Страница редактирования первооткрывателя",                                        
+     16666 					"name": "API м-м"                                                                          
+     16674 					"name": "Бэкэнд",                                                                          
+     16682 							"name": "Домен м-м",                                                                     
+     16705 									"name": "DELETE api/services/<int:pk>/delete_development/<int:pk>/"                    
+     16713 									"name": "PUT api/services/<int:service_id>/update/<int:development_id>/"               
+     16723 							"name": "Домен разработок",                                                              
+     16746 									"name": "GET api/developments/"                                                        
+     16754 									"name": "GET api/developments/<int:pk>/"                                               
+     16762 									"name": "POST api/developments/create/"                                                
+     16770 									"name": "PUT api/developments/<int:pk>/update/"                                        
+     16778 									"name": "DELETE api/developments/<int:pk>/delete/"                                     
+     16786 									"name": "POST api/developments/<int:pk>/add_to_service/"                               
+     16794 									"name": "GET api/developments/<int:pk>/image/"                                         
+     16802 									"name": "PUT api/developments/<int:pk>/update_image/"                                  
+     16812 							"name": "Домен сервисов",                                                                
+     16835 									"name": "GET api/services/search"                                                      
+     16843 									"name": "GET api/services/<int:pk>/"                                                   
+     16851 									"name": "PUT api/services/<int:pk>/update/"                                            
+     16859 									"name": "PUT api/services/<int:pk>/update_delivery_date/"                              
+     16867 									"name": "PUT api/services/<int:pk>/update_status_user/"                                
+     16875 									"name": "PUT api/services/<int:pk>/update_status_admin/"                               
+     16883 									"name": "DELETE api/services/<int:service_id>/delete_development/<int:development_id>/"
+     16893 							"name": "Домен пользователей",                                                           
+     16916 									"name": "POST api/login/"                                                              
+     16924 									"name": "POST api/register/"                                                           
+     16932 									"name": "PUT api/update_profile/"                                                      
+     16940 									"name": "POST api/logout/"                                                             
+     16952 					"name": "Страница регистрации",                                                            
+     16975 					"name": "Страница личного кабинета",                                                       
+     16998 					"name": "404"                                                                              
+     17008 			"name": "Диаграмма развертывания",                                                           
+     17016 					"name": "Диаграмма развертывания",                                                         
+     22880 					"name": "Конфигурация docker compose"                                                      
+     22888 					"name": "Ноутбук 192.168.1.73",                                                            
+     22896 							"name": "Десктопное Tauri приложение",                                                   
+     22932 							"name": "1.png",                                                                         
+     22948 					"name": "Сервер 192.168.1.10",                                                             
+     22956 							"name": "Конфигурация docker compose",                                                   
+     22964 									"name": "Контейнер Node.JS",                                                           
+     22972 											"name": "HTTP-сервер : 8000",                                                        
+     22995 											"name": "index.html",                                                                
+     23033 									"name": "Контейнер PostgreSQL",                                                        
+     23041 											"name": "PostgreSQL : 7432"                                                          
+     23051 									"name": "Контейнер Nginx",                                                             
+     23059 											"name": "Nginx : 9000",                                                              
+     23149 									"name": "Кластер контейнеров Minio 1...4"                                              
+     23157 									"name": "Minio2"                                                                       
+     23165 									"name": "Minio3"                                                                       
+     23173 									"name": "Minio4"                                                                       
+     23183 							"name": "WEB API"                                                                        
+     23193 					"name": "Ноутбук 192.168.1.30",                                                            
+     23201 							"name": "Postman",                                                                       
+     23274 									"name": "1.png",                                                                       
+     23288 									"name": "http://localhost:5050",                                                       
+     23315 									"name": "http://localhost:8000/api",                                                   
+     23333 					"name": "Interface1"                                                                       
+     23341 					"name": "Контейнер Redis"                                                                  
+     23349 					"name": "Redis : 6379"                                                                     
+     23357 					"name": "GitHub"                                                                           
+     23365 					"name": "Контейнер Minio"                                                                  
+     23373 					"name": "Асинхронный сервис : 3023",                                                       
+     23435 					"name": "level-calculator API"                                                             
+     23443 					"name": "Github Pages"                                                                     
+     23451 					"name": "Minio: 9001"                                                                      
+     23459 					"name": "Контейнер DRF",                                                                   
+     23467 							"name": "Django: 8000",                                                                  
+     23566 									"name": "json",                                                                        
+     23649 					"name": "Контейнер Postgres"                                                               
+     23657 					"name": "Postgres: 5432"                                                                   
+     23665 					"name": "Контейнер PgAdmin"                                                                
+     23673 					"name": "PgAdmin: 5050",                                                                   
+     23696 					"name": "Контейнер Redis"                                                                  
+     23704 					"name": "Reids: 6379"                                                                      
+     23712 					"name": "Chrome",                                                                          
+     23720 							"name": "http://localhost:3000",                                                         
+     23734 							"name": "http://localhost:5050",                                                         
+     23789 					"name": "Web API"                                                                          
+     23797 					"name": "Контейнер Node.JS"                                                                
+     23805 					"name": "HTTP-сервер: 3000",                                                               
+     23813 							"name": "http://192.168.1.73:8000/api/",                                                 
+     23840 							"name": "reverse-proxy",                                                                 
+     23869 					"name": "Tauri:1430",                                                                      
+     23877 							"name": "http://192.168.1.73:8000/api/",                                                 
+     23906 					"name": "WEB API"                                                                          
+     23914 					"name": "GitHub"                                                                           
+     23922 					"name": "GitHub Pages",                                                                    
+     23930 							"name": "http://localhost:8000/api/",                                                    
+     23972 					"name": "Телефон 192.168.1.71"                                                             
+     23980 					"name": "PWA",                                                                             
+     23988 							"name": "http://192.168.1.73:8000/api/",                                                 
+     24017 					"name": "api/"                                                                             
+     24025 					"name": "api/"                                                                             
+     24033 					"name": "Safari",                                                                          
+     24069 					"name": "Tauri Android: 1420",                                                             
+     24094 			"name": "Диаграмма статусов",                                                                
+     24102 					"name": "Диаграмма статусов",                                                              
+     26038 							"name": "Введена"                                                                        
+     26061 							"name": "Сформирована"                                                                   
+     26069 							"name": "Завершена"                                                                      
+     26077 							"name": "Отклонена"                                                                      
+     26085 							"name": "Удалена"                                                                        
+     26095 							"name": "Формирование сервиса",                                                          
+     26109 							"name": "Одобрение сервиса",                                                             
+     26123 							"name": "Отклонение сервиса",                                                            
+     26176 									"name": "Добавить первую разработку"                                                   
+     26186 							"name": "Удаление сервиса",                                                              
+     26213 							"name": "Добавить разработку в черновой сервис",                                         
+     26266 									"name": "Ушли с сайта"                                                                 
+     26280 			"name": "Диаграмма прецедентов",                                                             
+     26288 					"name": "Диаграмма прецедентов",                                                           
+     33762 					"name": "Инженер данных",                                                                  
+     33853 					"name": "Главный архитектор",                                                              
+     33971 					"name": "Интерфейс-администратора",                                                        
+     33979 							"name": "Отклонить заявку",                                                              
+     34002 							"name": "Проверить заявки",                                                              
+     34064 							"name": "Подтвердить заявку",                                                            
+     34087 							"name": "Посмотреть список алгоритмов",                                                  
+     34110 							"name": "Удалить алгоритм",                                                              
+     34133 							"name": "Отредактировать алгоритм",                                                      
+     34156 							"name": "Добавить алгоритм",                                                             
+     34181 					"name": "Интерфейс-пользователя",                                                          
+     34189 							"name": "Посмотреть список алгоритмов"                                                   
+     34197 							"name": "Авторизация"                                                                    
+     34205 							"name": "Добавить  алгоритм в азявку",                                                   
+     34254 							"name": "Посмотреть свои заявки",                                                        
+     34277 							"name": "Посмотреть информацию об алгоритме",                                            
+     34300 							"name": "Посмотреть свою черновой заявку",                                               
+     34323 							"name": "Удалить алгоритм из заявки",                                                    
+     34346 							"name": "Сформировать заявку",                                                           
+     34369 							"name": "Удалить заявку",                                                                
+     34394 					"name": "React-приложение"                                                                 
+     34402 					"name": "Гость",                                                                           
+     34439 					"name": "UseCase1"                                                                         
+     34447 					"name": "Авторизация"                                                                      
+     34457 			"name": "Диаграмма последовательностей",                                                     
+     34465 					"name": "Interaction1",                                                                    
+     34473 							"name": "Диаграмма последовательностей",                                                 
+     37519 							"name": "JSON Данные пользователя, сессия",                                              
+     37534 							"name": "Message1",                                                                      
+     37552 							"name": "JSON Список разработок, пустое id сервиса-черновика",                           
+     37567 							"name": "Message2",                                                                      
+     37584 							"name": "201",                                                                           
+     37599 							"name": "Message3",                                                                      
+     37616 							"name": "JSON Список разработок, кол-во разработок в сервисе, id сервиса-черновика",     
+     37631 							"name": "Message4",                                                                      
+     37648 							"name": "JSON Сервис-черновик",                                                          
+     37663 							"name": "Message5",                                                                      
+     37680 							"name": "JSON: Обновленный сервис-черновик",                                             
+     37695 							"name": "Message6",                                                                      
+     37713 							"name": "200",                                                                           
+     37745 							"name": "JSON: список сервисов",                                                         
+     37760 							"name": "Message7",                                                                      
+     37777 							"name": "200",                                                                           
+     37792 							"name": "Message8",                                                                      
+     37810 							"name": "JSON: список сервисов с посчитанными датами",                                   
+     37827 							"name": "Фронт (сервисчик)",                                                             
+     37872 							"name": "Фронт (сотрудник)",                                                             
+     37888 					"name": "Role1",                                                                           
+     37897 					"name": "Role2",                                                                           
+     37908 					"name": "Role3",                                                                           
+     37919 					"name": "Role4",                                                                           
+     37930 					"name": "Role5",                                                                           
+     37941 			"name": "Диграмма бизнес-процессов",                                                         
+     37949 					"name": "Бизнес процесс",                                                                  
+     40709 					"name": "Выбор группы"                                                                     
+     40717 					"name": "Получение расписания занятий группы"                                              
+     40725 					"name": "Action1"                                                                          
+     40733 					"name": "Action2"                                                                          
+     40741 					"name": "Сотрудник принимает решение"                                                      
+     40749 					"name": "DecisionNode1"                                                                    
+     40757 					"name": "MergeNode1"                                                                       
+     40765 					"name": "InitialNode1"                                                                     
+     40773 					"name": "ActivityFinalNode1"                                                               
+     40781 					"name": "Action3"                                                                          
+     40789 					"name": "Просмотреть сервис"                                                               
+     40797 					"name": "DecisionNode2"                                                                    
+     40805 					"name": "Очистить сервис"                                                                  
+     40813 					"name": "DecisionNode3"                                                                    
+     40821 					"name": "Указать ТЗ "                                                                      
+     40829 					"name": "Сформировать сервис"                                                              
+     40956 					"name": "Список получен",                                                                  
+     40970 					"name": "Группа выбрана",                                                                  
+     41010 					"name": "Продолжить выбор",                                                                
+     41024 					"name": "Нажата кнопка отправить",                                                         
+     41142 					"name": "Нажата кнопка подвердить",                                                        
+     41156 					"name": "У одной из групп уже есть занятие на выбранное время",                            
+     41170 					"name": "Сотрудник принимает решение",                                                     
+     41197 					"name": "Отклонить сервис",                                                                
+     41211 					"name": "Завершает сервис",                                                                
+     41251 					"name": "Занятия накладываются",                                                           
+     41265 					"name": "Попадает на страницу с формированием занятия",                                    
+     41292 					"name": "Закончить выбор",                                                                 
+     41449 					"name": "Да",                                                                              
+     41463 					"name": "Нет",                                                                             
+     41568 					"name": "Нет",                                                                             
+     41582 					"name": "Да",                                                                              
+     41637 					"name": "Сервисчик",                                                                       
+     41645 							"name": "InitialNode1"                                                                   
+     41653 							"name": "Добавление разработки в сервис",                                                
+     41661 									"name": "Event1"                                                                       
+     41671 							"name": "Формирование сервиса"                                                           
+     41679 							"name": "Выбор разработки"                                                               
+     41687 							"name": "DecisionNode1"                                                                  
+     41695 							"name": "DecisionNode1"                                                                  
+     41703 							"name": "Добавить в корзину"                                                             
+     41711 							"name": "DecisionNode2"                                                                  
+     41719 							"name": "Получить список разработок"                                                     
+     41727 							"name": "Выбрать разработку"                                                             
+     41735 							"name": "DecisionNode2"                                                                  
+     41743 							"name": "DecisionNode3"                                                                  
+     41751 							"name": "Очистить сервис"                                                                
+     41761 					"name": "Сотрудник",                                                                       
+     41769 							"name": "Отклонить сервис"                                                               
+     41777 							"name": "MergeNode1"                                                                     
+     41785 							"name": "Завершить сервис"                                                               
+     41793 							"name": "DecisionNode1"                                                                  
+     41801 							"name": "DecisionNode1"                                                                  
+     41809 							"name": "ActivityFinalNode1"                                                             
+     41817 							"name": "DecisionNode4"                                                                  
+     41825 							"name": "Отклонить сервис"                                                               
+     41833 							"name": "Принять сервис"                                                                 
+     41841 							"name": "ActivityFinalNode2"                                                             
+     41849 							"name": "ActivityFinalNode2"                                                             
+     41857 							"name": "ActivityFinalNode2"                                                             
+     41867 					"name": "Веб сервис",                                                                      
+     41875 							"name": "Рассчитать дату доставки"                                                       
+
+

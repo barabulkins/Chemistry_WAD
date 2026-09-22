@@ -10,7 +10,11 @@
   <div class="app-container">
     <div class="content-area feed-container">
       {{#if sample}}
-        <video class="feed-video" src="{{sample.video_url}}" autoplay loop muted playsinline poster="{{sample.image_url}}"></video>
+        <video class="feed-video" autoplay loop muted playsinline
+          poster="{{#if sample.image_url}}{{sample.image_url}}{{else}}/default.jpg{{/if}}"
+          onerror="this.poster='/default.jpg'; this.src='/default.mp4';">
+          <source src="{{#if sample.video_url}}{{sample.video_url}}{{else}}/default.mp4{{/if}}" type="video/mp4">
+        </video>
         
         <!-- Нижняя инфо-панель (поверх видео) -->
         <div class="feed-overlay">
@@ -33,7 +37,7 @@
             <span class="count">{{sample.gas_volume}} мл</span>
           </div>
 
-          <!-- Иконка лайка -->
+          <!-- Иконка лайка (только отображение из БД) -->
           <div class="action-btn">
             <svg class="icon" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             <span class="count">{{sample.likes}}</span>
@@ -45,7 +49,7 @@
           </a>
         </div>
       {{else}}
-        <div style="padding: 20px;">Нет доступных образцов</div>
+        <div style="padding: 20px; color: white;">Нет доступных образцов</div>
       {{/if}}
     </div>
     

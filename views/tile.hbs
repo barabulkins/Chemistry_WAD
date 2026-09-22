@@ -23,20 +23,25 @@
 
       <div class="cards-grid">
         {{#each samples}}
-          <a href="/technical-samples/feed/{{this.id}}" class="card">
-            <div class="card-img-container">
-              <img src="{{this.image_url}}" alt="{{this.title}}" class="card-img" onerror="this.src='https://placehold.co/400x700/222222/FFF?text=No+Image'">
-              {{#if this.isDraft}}
-                <div class="draft-badge">Черновик</div>
-              {{/if}}
-            </div>
-            <div class="card-info">
-              <h3 class="card-title">{{this.title}}</h3>
-              <div class="card-likes">
-                <span>❤️</span> {{this.likes}}
+          <div class="card">
+            <a href="/technical-samples/feed/{{this.id}}" style="text-decoration: none; color: inherit;">
+              <div class="card-img-container">
+                <img src="{{#if this.image_url}}{{this.image_url}}{{else}}/default.jpg{{/if}}" alt="{{this.title}}" class="card-img" onerror="this.src='/default.jpg'">
+                {{#if this.isDraft}}
+                  <div class="draft-badge">Черновик</div>
+                {{/if}}
               </div>
-            </div>
-          </a>
+              <div class="card-info">
+                <h3 class="card-title">{{this.title}}</h3>
+                <div class="card-likes">
+                  <span>❤️</span> {{this.likes}}
+                </div>
+              </div>
+            </a>
+            <form action="/technical-samples/{{this.id}}/delete" method="POST" style="padding: 0 12px 12px 12px;">
+              <button type="submit" class="search-btn" style="width: 100%; color: #da453f; border-color: #da453f;">Удалить</button>
+            </form>
+          </div>
         {{else}}
           <p>Ничего не найдено</p>
         {{/each}}
