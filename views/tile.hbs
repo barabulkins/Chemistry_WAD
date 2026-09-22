@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Плитка образцов</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="content-area grid-page">
+      
+      <!-- Фильтрация по объему газа -->
+      <form action="/technical-samples" method="GET" class="search-bar" style="flex-direction: column;">
+        <label id="gas_volume_label" for="gas_volume" style="font-size: 14px; font-weight: 600;">Объем газа (мл из 1 кг), текущий: {{#if queryVolume}}{{queryVolume}}{{else}}не задан{{/if}}</label>
+        <div style="display: flex; gap: 10px; width: 100%;">
+          <input type="range" name="gas_volume" id="gas_volume" class="form-control" style="flex: 1;"
+          value="{{#if queryVolume}}{{queryVolume}}{{else}}0{{/if}}" min="0" max="100" step="1"
+          oninput="document.getElementById('gas_volume_label').innerText = 'Объем газа (мл из 1 кг), текущий: ' + this.value">
+          <button type="submit" class="search-btn">Найти</button>
+        </div>
+      </form>
+
+      <div class="cards-grid">
+        {{#each samples}}
+          <a href="/technical-samples/feed/{{this.id}}" class="card">
+            <div class="card-img-container">
+              <img src="{{this.image_url}}" alt="{{this.title}}" class="card-img" onerror="this.src='https://placehold.co/400x700/222222/FFF?text=No+Image'">
+              {{#if this.isDraft}}
+                <div class="draft-badge">Черновик</div>
+              {{/if}}
+            </div>
+            <div class="card-info">
+              <h3 class="card-title">{{this.title}}</h3>
+              <div class="card-likes">
+                <span>❤️</span> {{this.likes}}
+              </div>
+            </div>
+          </a>
+        {{else}}
+          <p>Ничего не найдено</p>
+        {{/each}}
+      </div>
+
+    </div>
+    
+    {{> nav}}
+  </div>
+</body>
+</html>
