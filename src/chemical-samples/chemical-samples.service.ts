@@ -18,10 +18,8 @@ export class ChemicalSamplesService {
   async findAllForTile(gasVolume?: number) {
     const qb = this.sampleRepo
       .createQueryBuilder('s')
-      .leftJoin('s.likes', 'l')
-      .addSelect('COUNT(l.id)', 'likes_count')
-      .where('s.status != :deleted', { deleted: 'deleted' })
-      .groupBy('s.id');
+      .leftJoinAndSelect('s.likes', 'l')
+      .where('s.status != :deleted', { deleted: 'deleted' });
 
     if (gasVolume !== undefined && gasVolume !== null) {
       qb.andWhere('s.gas_volume = :vol', { vol: gasVolume });
@@ -29,9 +27,9 @@ export class ChemicalSamplesService {
 
     qb.orderBy('s.id', 'ASC');
 
-    const raw = await qb.getRawAndEntities();
+    const entities = await qb.getMany();
 
-    return raw.entities.map((entity, i) => ({
+    return entities.map((entity) => ({
       id: entity.id,
       title: entity.title,
       description: entity.description,
@@ -40,7 +38,7 @@ export class ChemicalSamplesService {
       video_url: entity.video_url,
       impurities_percent: entity.impurities_percent,
       gas_volume: entity.gas_volume,
-      likes: parseInt(raw.raw[i].likes_count, 10) || 0,
+      likes: entity.likes ? entity.likes.length : 0,
       isDraft: entity.status === 'draft',
     }));
   }
@@ -55,10 +53,8 @@ export class ChemicalSamplesService {
   // ─── GET: Лента (только published, строго 1 строка из БД) ───
   async findOneForFeed(id?: number, next?: boolean) {
     const qb = this.sampleRepo.createQueryBuilder('s')
-      .leftJoin('s.likes', 'l')
-      .addSelect('COUNT(l.id)', 'likes_count')
+      .leftJoinAndSelect('s.likes', 'l')
       .where('s.status = :status', { status: 'published' })
-      .groupBy('s.id')
       .orderBy('s.id', 'ASC')
       .limit(1);
 
@@ -68,26 +64,24 @@ export class ChemicalSamplesService {
       qb.andWhere('s.id = :id', { id });
     }
 
-    let rawAndEntities = await qb.getRawAndEntities();
+    let entities = await qb.getMany();
 
     // Если нажали "Далее" и дошли до конца — начинаем сначала (Wrap around)
-    if (rawAndEntities.entities.length === 0 && id && next) {
-      rawAndEntities = await this.sampleRepo.createQueryBuilder('s')
-        .leftJoin('s.likes', 'l')
-        .addSelect('COUNT(l.id)', 'likes_count')
+    if (entities.length === 0 && id && next) {
+      entities = await this.sampleRepo.createQueryBuilder('s')
+        .leftJoinAndSelect('s.likes', 'l')
         .where('s.status = :status', { status: 'published' })
-        .groupBy('s.id')
         .orderBy('s.id', 'ASC')
         .limit(1)
-        .getRawAndEntities();
+        .getMany();
     }
 
-    if (rawAndEntities.entities.length === 0) {
+    if (entities.length === 0) {
       return null;
     }
 
-    const entity = rawAndEntities.entities[0];
-    const likesCount = parseInt(rawAndEntities.raw[0].likes_count, 10) || 0;
+    const entity = entities[0];
+    const likesCount = entity.likes ? entity.likes.length : 0;
 
     return {
       id: entity.id,
@@ -140,10 +134,23 @@ export class ChemicalSamplesService {
     return this.sampleRepo.save(draft);
   }
 
-  // ─── POST: Логическое удаление через raw SQL (без ORM) ───
+  // ─── POST: Логическое удаление через raw SQL (без ORM) с использованием курсора ───
   async deleteSampleRaw(sampleId: number) {
-    const query = `UPDATE chemical_samples SET status = 'deleted' WHERE id = $1 AND status != 'deleted'`;
-    const result = await this.dataSource.query(query, [sampleId]);
-    return result;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.query(`DECLARE delete_cursor CURSOR FOR SELECT id FROM chemical_samples WHERE id = $1 AND status != 'deleted' FOR UPDATE`, [sampleId]);
+      await queryRunner.query(`FETCH NEXT FROM delete_cursor`);
+      await queryRunner.query(`UPDATE chemical_samples SET status = 'deleted' WHERE CURRENT OF delete_cursor`);
+      await queryRunner.query(`CLOSE delete_cursor`);
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

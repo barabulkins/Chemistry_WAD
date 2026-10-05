@@ -1,39 +1,28 @@
 const fs = require('fs');
 
-const data = JSON.parse(fs.readFileSync('diagram.mdj', 'utf8'));
+const path = 'diagram.mdj';
+const content = fs.readFileSync(path, 'utf-8');
+const data = JSON.parse(content);
 
-function findEntities(obj, results = []) {
-  if (obj && typeof obj === 'object') {
-    if (obj._type === 'ERDEntity') {
-      results.push(obj);
+function findEntities(obj) {
+    let entities = [];
+    if (obj && typeof obj === 'object') {
+        if (obj._type === 'ERDEntity') {
+            entities.push(obj);
+        }
+        for (let key in obj) {
+            entities = entities.concat(findEntities(obj[key]));
+        }
     }
-    for (const key in obj) {
-      findEntities(obj[key], results);
-    }
-  }
-  return results;
+    return entities;
 }
 
 const entities = findEntities(data);
-const entMap = {};
-entities.forEach(ent => {
-  entMap[ent._id] = ent.name;
-  console.log(`Entity: ${ent.name} -> ID: ${ent._id}`);
-});
-
-function findRelations(obj, results = []) {
-  if (obj && typeof obj === 'object') {
-    if (obj._type === 'ERDRelationship') {
-      results.push(obj);
+entities.forEach(e => {
+    console.log(`Table: ${e.name}`);
+    if (e.columns) {
+        e.columns.forEach(c => {
+            console.log(`  - ${c.name} (${c.type}) pk:${c.primaryKey} fk:${c.foreignKey} ref:${c.referenceTo ? c.referenceTo.$ref : ''} length:${c.length} nullable:${c.isNullable}`);
+        });
     }
-    for (const key in obj) {
-      findRelations(obj[key], results);
-    }
-  }
-  return results;
-}
-
-const rels = findRelations(data);
-rels.forEach(rel => {
-  console.log(`Relation: ${entMap[rel.end1.reference.$ref]} <-> ${entMap[rel.end2.reference.$ref]}`);
 });
