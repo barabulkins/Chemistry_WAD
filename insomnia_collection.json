@@ -1,0 +1,255 @@
+{
+  "info": {
+    "name": "Lab 4 - REST API & Session Auth",
+    "description": "Коллекция запросов лабораторной работы №4: Авторизация через сессии и куки, разграничение прав доступа (гость / создатель), автозаполнение создателя, Swagger документация",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Публичные методы (Гость — без авторизации)",
+      "item": [
+        {
+          "name": "1.1 GET список опубликованных с фильтрацией",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples?gas_volume=85",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples"],
+              "query": [
+                {
+                  "key": "gas_volume",
+                  "value": "85",
+                  "description": "Опциональный фильтр по объёму выделившегося газа (мл)"
+                }
+              ]
+            },
+            "description": "Доступно БЕЗ авторизации. Возвращает только опубликованные образцы. Если запрошено гостем, признаки is_creator и is_liked равны 0."
+          }
+        },
+        {
+          "name": "1.2 GET лента (по одной карточке с закольцовыванием)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/feed?id=4&next=true",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "feed"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "4",
+                  "description": "ID текущей карточки"
+                },
+                {
+                  "key": "next",
+                  "value": "true",
+                  "description": "Флаг перехода к следующей карточке"
+                }
+              ]
+            },
+            "description": "Доступно БЕЗ авторизации. Вертикальная лента карточек опубликованных образцов с закольцовыванием."
+          }
+        },
+        {
+          "name": "1.3 GET детальный просмотр опубликованного образца по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/4",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "4"]
+            },
+            "description": "Доступно БЕЗ авторизации. Просмотр полной информации об опубликованном образце."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Аутентификация и пользователи",
+      "item": [
+        {
+          "name": "2.1 POST регистрация пользователя (хэширование bcrypt + автосессия)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"Chemist Pro\",\n  \"email\": \"chemist_pro@lab.ru\",\n  \"password\": \"secretPass123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/register",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "register"]
+            },
+            "description": "Регистрация нового пользователя с защищенным хэшированием пароля алгоритмом bcrypt. Автоматически создает сессию и устанавливает куку connect.sid."
+          }
+        },
+        {
+          "name": "2.2 POST вход в систему (создание сессии и cookie connect.sid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"chemist_pro@lab.ru\",\n  \"password\": \"secretPass123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/login",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "login"]
+            },
+            "description": "Аутентификация пользователя. Проверяет хэш пароля bcrypt, инициализирует серверную сессию express-session и возвращает HTTP-only cookie connect.sid."
+          }
+        },
+        {
+          "name": "2.3 GET профиль текущего пользователя (требует авторизации)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/me",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "me"]
+            },
+            "description": "Возвращает id, username и email текущего авторизованного пользователя. При отсутствии сессии возвращает 401 Unauthorized."
+          }
+        },
+        {
+          "name": "2.4 POST выход из системы (деавторизация)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/logout",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "logout"]
+            },
+            "description": "Уничтожает сессию на сервере и очищает сессионный cookie connect.sid."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Методы создателя (Защищенные — с авторизацией)",
+      "item": [
+        {
+          "name": "3.1 POST добавление услуги (автозаполнение creator_id из сессии + MinIO)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Оксид кремния высокой чистоты",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Файл изображения (.jpg, .png)"
+                },
+                {
+                  "key": "video",
+                  "type": "file",
+                  "description": "Файл короткого видео (.mp4)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples"]
+            },
+            "description": "Создание черновика услуги. Автор (creator_id) АВТОМАТИЧЕСКИ заполняется из сессии! Файлы загружаются в MinIO S3 с уникальными именами на латинице (UUID). Без сессии возвращает 401 Unauthorized."
+          }
+        },
+        {
+          "name": "3.2 GET получение активного черновика создателя",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/draft",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "draft"]
+            },
+            "description": "Возвращает активный черновик текущего создателя. Без сессии возвращает 401 Unauthorized."
+          }
+        },
+        {
+          "name": "3.3 PUT публикация черновика создателя",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Оксид кремния чистый для анализа\",\n  \"description\": \"Проведен спектральный анализ. Высокая термическая стойкость.\",\n  \"gas_volume\": 60,\n  \"impurities_percent\": 0.85\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples/publish",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "publish"]
+            },
+            "description": "Переводит черновик текущего пользователя в статус 'published', фиксирует formation_date = NOW(). Без сессии возвращает 401 Unauthorized."
+          }
+        },
+        {
+          "name": "3.4 POST отметка like (от текущего авторизованного пользователя)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples/4/like",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "4", "like"]
+            },
+            "description": "Ставит (1) или снимает (0) лайк от имени текущего авторизованного пользователя. Без сессии возвращает 401 Unauthorized."
+          }
+        },
+        {
+          "name": "3.5 DELETE удаление образца (Soft Delete через курсор SQL)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/12",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "12"]
+            },
+            "description": "Логическое удаление образца (status = deleted) через курсор SQL FOR UPDATE. Удалять разрешено ТОЛЬКО образцы текущего создателя. Без сессии возвращает 401 Unauthorized."
+          }
+        }
+      ]
+    }
+  ]
+}

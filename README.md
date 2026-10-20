@@ -1,114 +1,232 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Веб-сервис управления химическими образцами (Лабораторная работа №4)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Данный проект представляет собой RESTful веб-сервис, разработанный на базе фреймворка **NestJS** (Node.js + TypeScript) с реляционной базой данных **PostgreSQL** (TypeORM), объектным хранилищем медиафайлов **MinIO S3**, сессионной авторизацией на основе **cookies (express-session)** и интерактивной документацией **Swagger (OpenAPI 3.0)**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 1. Задание на лабораторную работу №4
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Тема:** Добавление авторизации и Swagger в веб-сервис, подготовка ТЗ.
+- **Требования к аутентификации:**
+  - Реализовать методы бэкенда для аутентификации и регистрации.
+  - Авторизация через **хранение сессий и куки для NestJS** (`express-session` + `cookie-parser`, cookie `connect.sid`).
+  - Хэширование паролей криптостойким алгоритмом `bcrypt` с солью.
+- **Автозаполнение создателя:**
+  - Автозаполнение пользователя (`creator_id`) в таблице услуг/образцов при создании нового образца (`POST /api/samples`) из активной сессии текущего пользователя.
+- **Разграничение прав доступа:**
+  - **Без авторизации (Гость):** в Swagger и API доступно **только чтение-получение данных через API** (каталог опубликованных образцов с фильтрацией, лента с закольцовыванием, детальный просмотр), а также регистрация и вход. При попытке вызова защищенных методов возвращается `401 Unauthorized`.
+  - **С авторизацией (Создатель):** доступны методы создателя (создание нового черновика с автозаполнением автора, получение своего черновика, публикация, удаление через SQL-курсор `FOR UPDATE`, выставление лайков, профиль и выход).
+- **Документирование Swagger (OpenAPI 3.0):**
+  - Добавить детальное описание методов для Swagger (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiCookieAuth`, DTO).
+  - Сконфигурировать поддержку cookies (`withCredentials: true`, `cookieAuth` для `connect.sid`).
+- **Подготовка ТЗ:**
+  - Разработано и оформлено официальное Техническое Задание (файл [`TZ.md`](file:///c:/Users/user/Desktop/рип/4/chemistry_wad4/TZ.md)).
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 2. Архитектура и технологии
+
+- **Бэкенд:** NestJS 12 (TypeScript, Express)
+- **База данных:** PostgreSQL 15+
+- **ORM:** TypeORM 1.1+ (Data Mapper / Active Record, поддержка сырых курсоров SQL в транзакциях)
+- **Объектное S3-хранилище:** MinIO (хранение изображений и коротких видеороликов с генерацией UUIDv4 имен на латинице)
+- **Загрузка файлов:** Multer (`FileFieldsInterceptor`, обработка `multipart/form-data`)
+- **Аутентификация и сессии:** `express-session`, `cookie-parser`, HTTP-Only cookie `connect.sid`
+- **Хэширование:** `bcryptjs`
+- **Защита эндпоинтов:** `SessionAuthGuard`, кастомные декораторы `@CurrentUser()`, `@OptionalUserId()`
+- **Документация API:** `@nestjs/swagger`, `swagger-ui-express` (Swagger UI доступен по адресу `/api/docs`)
+- **Тестирование:** Insomnia / Postman (`insomnia_collection.json`)
+
+---
+
+## 3. Разделение прав доступа (Гость vs Создатель)
+
+```
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          БЕЗ АВТОРИЗАЦИИ (ГОСТЬ)                               │
+│  Доступно ТОЛЬКО чтение-получение данных через API, регистрация и вход        │
+├────────────────────────────────────────────────────────────────────────────────┤
+│  GET  /api/samples          — Список опубликованных образцов (с фильтром)      │
+│  GET  /api/samples/feed     — Вертикальная лента карточек (с закольцовыванием) │
+│  GET  /api/samples/:id      — Детальный просмотр опубликованного образца       │
+│  POST /api/users/register   — Регистрация учетной записи (хэш bcrypt)          │
+│  POST /api/users/login      — Аутентификация (установка cookie connect.sid)    │
+│                                                                                │
+│  * При попытке вызвать методы создателя сервер вернет 401 Unauthorized         │
+└───────────────────────────────────────┬────────────────────────────────────────┘
+                                        │ Вход: POST /api/users/login
+                                        ▼
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                      С АВТОРИЗАЦИЕЙ (СОЗДАТЕЛЬ / CREATOR)                      │
+│  Доступны все методы гостя + методы управления услугами                        │
+├────────────────────────────────────────────────────────────────────────────────┤
+│  POST   /api/samples          — Создание черновика (АВТОЗАПОЛНЕНИЕ creator_id) │
+│  GET    /api/samples/draft    — Просмотр своего черновика (не более 1 записи) │
+│  PUT    /api/samples/publish  — Публикация черновика (formation_date = NOW()) │
+│  DELETE /api/samples/:id      — Soft delete через SQL-курсор (только свои)     │
+│  POST   /api/samples/:id/like — Поставить/снять лайк от своего имени          │
+│  GET    /api/users/me         — Профиль текущего авторизованного пользователя  │
+│  POST   /api/users/logout     — Уничтожение серверной сессии и очистка cookie  │
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 4. Описание методов REST API
 
-# watch mode
-$ npm run start:dev
+Все методы API имеют общий префикс `/api`.
 
-# production mode
-$ npm run start:prod
+### 4.1. Публичные методы (Чтение — без авторизации)
+
+#### 1. `GET /api/samples` — Список опубликованных с фильтрацией
+- **Назначение:** Получение списка опубликованных образцов.
+- **Параметры строки запроса (Query Params):**
+  - `gas_volume` (опциональный, число): фильтрация по объёму выделившегося газа.
+- **Поведение для гостя:** Возвращаются записи с признаками `is_creator: 0` и `is_liked: 0`.
+- **Поведение для авторизованного создателя:** Признаки `is_creator` (1 если автор) и `is_liked` (1 если лайкнул) динамически рассчитываются относительно сессии.
+- **Код ответа:** `200 OK`.
+
+#### 2. `GET /api/samples/feed` — Лента опубликованных образцов
+- **Назначение:** Постраничный просмотр карточек ленты.
+- **Параметры:**
+  - `id` (опциональный): идентификатор текущего образца.
+  - `next=true` (опциональный): перейти к следующей карточке.
+- **Закольцовывание:** При достижении конца ленты запрос с `next=true` автоматически отдает первую карточку.
+- **Код ответа:** `200 OK`.
+
+#### 3. `GET /api/samples/:id` — Детальный просмотр опубликованного образца
+- **Назначение:** Получение полной информации об опубликованном образце по первичному ключу.
+- **Коды ответа:** `200 OK`, `404 Not Found`.
+
+---
+
+### 4.2. Аутентификация и пользователи
+
+#### 4. `POST /api/users/register` — Регистрация нового пользователя
+- **Формат тела:** JSON (`username`, `email`, `password`).
+- **Бизнес-логика:**
+  - Проверяет уникальность email в БД.
+  - Хэширует пароль с помощью `bcrypt.hash(password, 10)`.
+  - Сохраняет пользователя и автоматически инициализирует серверную сессию (`req.session.userId = user.id`), возвращая заголовок `Set-Cookie: connect.sid=...`.
+- **Коды ответа:** `201 Created`, `400 Bad Request`.
+
+#### 5. `POST /api/users/login` — Аутентификация (Вход)
+- **Формат тела:** JSON (`email`, `password`).
+- **Бизнес-логика:**
+  - Находит пользователя по email.
+  - Проверяет соответствие пароля хэшу через `bcrypt.compare`.
+  - При успехе сохраняет `userId`, `username`, `email` в сессию `req.session` и устанавливает сессионную куку `connect.sid`.
+- **Коды ответа:** `200 OK`, `401 Unauthorized`.
+
+#### 6. `POST /api/users/logout` — Деавторизация (Выход)
+- **Назначение:** Завершение сеанса работы.
+- **Бизнес-логика:** Уничтожает сессию на сервере (`req.session.destroy`) и очищает клиентский cookie `connect.sid`.
+- **Код ответа:** `200 OK`.
+
+#### 7. `GET /api/users/me` — Профиль текущего пользователя
+- **Защита:** `SessionAuthGuard`. Доступно только с валидной сессионной кукой.
+- **Возвращает:** `{ id, username, email }`.
+- **Коды ответа:** `200 OK`, `401 Unauthorized` (если сессии нет).
+
+---
+
+### 4.3. Методы создателя (Защищенные — с авторизацией)
+
+#### 8. `GET /api/samples/draft` — Черновик текущего создателя
+- **Защита:** `SessionAuthGuard`.
+- **Бизнес-логика:** Извлекает черновик текущего пользователя (`creator_id = req.session.userId`, `status = 'draft'`).
+- **Коды ответа:** `200 OK` (объект черновика или `null`), `401 Unauthorized`.
+
+#### 9. `POST /api/samples` — Создание черновика + автозаполнение автора + MinIO
+- **Защита:** `SessionAuthGuard`.
+- **Формат запроса:** `multipart/form-data`.
+- **Поля формы:**
+  - `title` (строка, **обязательное**): название образца.
+  - `image` (файл, **обязательное**): изображение (.jpg, .png).
+  - `video` (файл, **обязательное**): видеоролик (.mp4).
+- **Автозаполнение создателя:**
+  - Поле `creator_id` **автоматически заполняется на бэкенде** из сессии (`req.session.userId`). Клиент не передает `creator_id`.
+- **Валидация и MinIO:**
+  - Если файлы отсутствуют — `400 Bad Request`.
+  - Если у пользователя уже есть активный черновик — `400 Bad Request` (правило: не более одного черновика).
+  - Файлы загружаются в S3 бакет `chemistry1` с латинскими UUID-именами (`img_<uuid>.<ext>`, `vid_<uuid>.<ext>`).
+- **Коды ответа:** `201 Created`, `400 Bad Request`, `401 Unauthorized`.
+
+#### 10. `PUT /api/samples/publish` — Публикация черновика
+- **Защита:** `SessionAuthGuard`.
+- **Формат тела:** JSON (`title`, `description`, `impurities_percent`, `gas_volume`).
+- **Бизнес-логика:** Находит черновик текущего создателя, переводит `status = 'published'`, фиксирует дату публикации `formation_date = NOW()`.
+- **Коды ответа:** `200 OK`, `401 Unauthorized`, `404 Not Found`.
+
+#### 11. `DELETE /api/samples/:id` — Логическое удаление через SQL-курсор
+- **Защита:** `SessionAuthGuard`.
+- **Бизнес-логика:**
+  - Удалять разрешено **только образцы текущего создателя** (`creator_id = req.session.userId`).
+  - Выполняется транзакция с объявлением курсора:
+    ```sql
+    DECLARE delete_cursor CURSOR FOR
+      SELECT id FROM chemical_samples
+      WHERE id = $1 AND creator_id = $2 AND status != 'deleted'
+      FOR UPDATE;
+    FETCH NEXT FROM delete_cursor;
+    UPDATE chemical_samples SET status = 'deleted' WHERE CURRENT OF delete_cursor;
+    CLOSE delete_cursor;
+    ```
+- **Коды ответа:** `200 OK`, `401 Unauthorized`, `404 Not Found`.
+
+#### 12. `POST /api/samples/:id/like` — Лайк / снятие лайка
+- **Защита:** `SessionAuthGuard`.
+- **Формат тела:** JSON (`value: 1` — поставить, `value: 0` — снять).
+- **Бизнес-логика:** Привязывает запись `sample_likes` к `user_id = req.session.userId`.
+- **Коды ответа:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`.
+
+---
+
+## 5. Документация Swagger (OpenAPI 3.0)
+
+Интерактивная спецификация доступна по адресу:
+- **URL:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- Также настроены алиасы [http://localhost:3000/docs](http://localhost:3000/docs) и [http://localhost:3000/swagger](http://localhost:3000/swagger).
+
+### Возможности Swagger UI в проекте:
+1. **Группировка по тегам:**
+   - `Публичные методы (Чтение — без авторизации)`
+   - `Аутентификация и пользователи`
+   - `Методы создателя (Защищенные — с авторизацией)`
+2. **Сессионная авторизация в Swagger:**
+   - Настроена схема безопасности `cookieAuth` для куки `connect.sid`.
+   - Включена опция `withCredentials: true`. После выполнения запроса `POST /api/users/login` в Swagger UI браузер автоматически сохраняет сессионную куку и прозрачно передает ее при вызове любых методов создателя прямо из веб-интерфейса!
+
+---
+
+## 6. Запуск и проверка проекта
+
+### 6.1. Запуск инфраструктуры
+1. **PostgreSQL:** Убедитесь, что PostgreSQL запущен на порту `5432` с базой `chemistry_db` (пользователь `postgres`, пароль `postgres`).
+2. **MinIO S3:** Запустите MinIO сервер на порту `9000`:
+   ```powershell
+   .\minio.exe server .\minio_data --console-address ":9001"
+   ```
+
+### 6.2. Запуск приложения NestJS
+```powershell
+npm install
+npm run build
+npm run start:dev
 ```
+Сервер запустится на порту `3000`.
 
-## Run tests
+### 6.3. Проверка через Swagger UI
+Откройте браузер по адресу: `http://localhost:3000/api/docs`
 
-```bash
-# unit tests
-$ npm run test
+1. Проверьте публичный метод `GET /api/samples` без авторизации — данные возвращаются (`200 OK`).
+2. Попробуйте вызвать `GET /api/samples/draft` без входа — возвращается `401 Unauthorized`.
+3. Выполните вход через `POST /api/users/login` (`email: chemist@lab.ru`, `password: 12345`).
+4. Повторите вызов `GET /api/samples/draft` или `POST /api/samples` — запрос успешно проходит под учетной записью вошедшего создателя!
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - Kirsanov Vladimir
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 6.4. Проверка через коллекцию Insomnia / Postman
+Импортируйте файл [`insomnia_collection.json`](file:///c:/Users/user/Desktop/рип/4/chemistry_wad4/insomnia_collection.json).
+Все 12 запросов разбиты по папкам:
+1. `Публичные методы (Гость — без авторизации)`
+2. `Аутентификация и пользователи`
+3. `Методы создателя (Защищенные — с авторизацией)`

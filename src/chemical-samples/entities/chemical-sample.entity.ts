@@ -24,10 +24,10 @@ export class ChemicalSample {
   @Column({ type: 'varchar', length: 20, default: 'draft' })
   status: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', default: '/default.jpg', nullable: true })
   image_url: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', default: '/default.mp4', nullable: true })
   video_url: string;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })

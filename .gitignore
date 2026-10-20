@@ -58,3 +58,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # MinIO binary and data (too large for GitHub)
 minio.exe
 minio_data/
+
+# Postman workspace local metadata
+.postman/
+postman/
+
