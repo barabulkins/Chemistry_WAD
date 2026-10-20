@@ -10,11 +10,14 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ChemicalSamplesService } from './chemical-samples.service';
+import { CurrentUser } from '../auth/current-user';
 
 @Controller('technical-samples')
 export class ChemicalSamplesController {
-  // Фиксированный пользователь для лабораторной
-  private readonly CURRENT_USER_ID = 1;
+  // Фиксированный пользователь через singleton
+  private get CURRENT_USER_ID(): number {
+    return CurrentUser.getInstance().getId();
+  }
 
   constructor(private readonly samplesService: ChemicalSamplesService) {}
 
@@ -22,8 +25,7 @@ export class ChemicalSamplesController {
   @Get()
   @Render('tile')
   async getAll(@Query('gas_volume') volume?: string) {
-    const gasVol =
-      volume && volume.trim() !== '' ? Number(volume) : undefined;
+    const gasVol = volume && volume.trim() !== '' ? Number(volume) : undefined;
     const samples = await this.samplesService.findAllForTile(gasVol);
     return { samples, queryVolume: volume || '' };
   }
@@ -32,9 +34,7 @@ export class ChemicalSamplesController {
   @Get('draft')
   @Render('add')
   async getDraft() {
-    const draft = await this.samplesService.findDraftByUser(
-      this.CURRENT_USER_ID,
-    );
+    const draft = await this.samplesService.findDraftByUser(this.CURRENT_USER_ID);
     return { sample: draft || null, hasDraft: !!draft };
   }
 
@@ -43,15 +43,20 @@ export class ChemicalSamplesController {
   @Render('feed')
   async getFeed(@Param('id') id?: string, @Query('next') next?: string) {
     const isNext = next === 'true';
-    const sample = await this.samplesService.findOneForFeed(id ? Number(id) : undefined, isNext);
-    
+    const sample = await this.samplesService.findOneForFeed(
+      id ? Number(id) : undefined,
+      isNext,
+    );
     return { sample };
   }
 
   // ─── 4. POST: Создание черновика (ORM) ───
   @Post('draft')
   async createDraft(@Body('title') title: string, @Res() res: Response) {
-    await this.samplesService.createDraft(this.CURRENT_USER_ID, title || 'Новый образец');
+    await this.samplesService.createDraftFrontend(
+      this.CURRENT_USER_ID,
+      title || 'Новый образец',
+    );
     return res.redirect('/technical-samples/draft');
   }
 
@@ -64,7 +69,7 @@ export class ChemicalSamplesController {
     @Body('gas_volume') gasVolume: string,
     @Res() res: Response,
   ) {
-    await this.samplesService.publishDraft(
+    await this.samplesService.publishDraftFrontend(
       this.CURRENT_USER_ID,
       title,
       description,
@@ -74,7 +79,7 @@ export class ChemicalSamplesController {
     return res.redirect('/technical-samples');
   }
 
-  // ─── 6. POST: Логическое удаление через SQL cursor (без ORM) ───
+  // ─── 6. POST: Логическое удаление через SQL cursor ───
   @Post(':id/delete')
   async deleteSample(@Param('id') id: string, @Res() res: Response) {
     await this.samplesService.deleteSampleRaw(Number(id));

@@ -1,0 +1,5 @@
+$kind: http-request
+description: DELETE удаление (только soft delete). Только услуги этого пользователя
+url: localhost:3000/api/samples/1
+method: DELETE
+order: 6000

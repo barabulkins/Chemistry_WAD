@@ -1,0 +1,10 @@
+$kind: http-request
+name: GET список с фильтрацией (только опубликованные)
+description: GET список с фильтрацией (только опубликованные). Признак 0/1 если создатель услуги совпадает с текущим пользователем (поле is_creator)
+url: localhost:3000/api/samples?gas_volume=25
+method: GET
+queryParams:
+  - key: gas_volume
+    value: "25"
+    description: Фильтрация по объему газа
+order: 1000

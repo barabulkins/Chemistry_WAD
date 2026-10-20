@@ -1,0 +1,19 @@
+$kind: http-request
+description: POST добавление + добавление файлов изображения и короткого видео (как файлы а НЕ просто URL), название файлов сохраняются в полях БД, а сами файлы в minio. Названия файлов генерируются на латинице
+url: localhost:3000/api/samples
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: title
+      value: Новый экспериментальный образец
+    - type: file
+      key: image
+      src: []
+      description: Файл изображения (обязательно)
+    - type: file
+      key: video
+      src: []
+      description: Файл короткого видео (обязательно)
+order: 4000

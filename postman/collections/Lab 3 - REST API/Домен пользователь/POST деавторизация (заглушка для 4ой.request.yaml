@@ -1,0 +1,6 @@
+$kind: http-request
+name: POST деавторизация (заглушка для 4ой лабораторной)
+description: POST деавторизация (заглушка для 4ой лабораторной)
+url: localhost:3000/api/users/logout
+method: POST
+order: 3000

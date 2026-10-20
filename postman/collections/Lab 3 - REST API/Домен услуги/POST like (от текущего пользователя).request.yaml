@@ -1,0 +1,13 @@
+$kind: http-request
+description: POST like (от текущего пользователя). Поле 0/1 (0 отменяет лайк, 1 ставит лайк)
+url: localhost:3000/api/samples/4/like
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "value": 1
+    }
+order: 7000

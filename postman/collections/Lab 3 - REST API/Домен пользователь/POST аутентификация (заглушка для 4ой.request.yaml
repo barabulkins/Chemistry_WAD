@@ -1,0 +1,15 @@
+$kind: http-request
+name: POST аутентификация (заглушка для 4ой лабораторной)
+description: POST аутентификация (заглушка для 4ой лабораторной)
+url: localhost:3000/api/users/login
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "student@lab.ru",
+      "password": "12345"
+    }
+order: 2000

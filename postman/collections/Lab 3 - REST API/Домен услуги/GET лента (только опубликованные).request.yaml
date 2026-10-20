@@ -1,0 +1,5 @@
+$kind: http-request
+description: GET лента (только опубликованные). Признак 0/1 если текущий пользователь лайкнул эту услугу (поле is_liked)
+url: localhost:3000/api/samples/feed
+method: GET
+order: 2000

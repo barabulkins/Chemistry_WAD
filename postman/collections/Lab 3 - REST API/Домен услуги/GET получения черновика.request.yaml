@@ -1,0 +1,5 @@
+$kind: http-request
+description: GET получения черновика (не более 1 записи для пользователя), ид не указывается
+url: localhost:3000/api/samples/draft
+method: GET
+order: 3000

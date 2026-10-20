@@ -1,0 +1,210 @@
+{
+  "info": {
+    "name": "Lab 3 - REST API",
+    "description": "Коллекция запросов лабораторной работы №3 по регламенту",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Домен услуги",
+      "item": [
+        {
+          "name": "GET список с фильтрацией (только опубликованные)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples?gas_volume=25",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples"],
+              "query": [
+                {
+                  "key": "gas_volume",
+                  "value": "25",
+                  "description": "Фильтрация по объему газа"
+                }
+              ]
+            },
+            "description": "GET список с фильтрацией (только опубликованные). Признак 0/1 если создатель услуги совпадает с текущим пользователем (поле is_creator)"
+          }
+        },
+        {
+          "name": "GET лента (только опубликованные)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/feed",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "feed"]
+            },
+            "description": "GET лента (только опубликованные). Признак 0/1 если текущий пользователь лайкнул эту услугу (поле is_liked)"
+          }
+        },
+        {
+          "name": "GET получения черновика",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/draft",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "draft"]
+            },
+            "description": "GET получения черновика (не более 1 записи для пользователя), ид не указывается"
+          }
+        },
+        {
+          "name": "POST добавление",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Новый экспериментальный образец",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Файл изображения (обязательно)"
+                },
+                {
+                  "key": "video",
+                  "type": "file",
+                  "description": "Файл короткого видео (обязательно)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples"]
+            },
+            "description": "POST добавление + добавление файлов изображения и короткого видео (как файлы а НЕ просто URL), название файлов сохраняются в полях БД, а сами файлы в minio. Названия файлов генерируются на латинице"
+          }
+        },
+        {
+          "name": "PUT публикации (смена статуса)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Опубликованный гранит\",\n  \"description\": \"Добавлено подробное описание минерального состава.\",\n  \"gas_volume\": 25,\n  \"impurities_percent\": 3.5\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples/publish",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "publish"]
+            },
+            "description": "PUT публикации (смена статуса)"
+          }
+        },
+        {
+          "name": "DELETE удаление (только soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/samples/1",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "1"]
+            },
+            "description": "DELETE удаление (только soft delete). Только услуги этого пользователя"
+          }
+        },
+        {
+          "name": "POST like (от текущего пользователя)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/samples/4/like",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "samples", "4", "like"]
+            },
+            "description": "POST like (от текущего пользователя). Поле 0/1 (0 отменяет лайк, 1 ставит лайк)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Домен пользователь",
+      "item": [
+        {
+          "name": "POST регистрация",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"Student Lab\",\n  \"email\": \"student_new@lab.ru\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/register",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "register"]
+            },
+            "description": "POST регистрация"
+          }
+        },
+        {
+          "name": "POST аутентификация (заглушка для 4ой лабораторной)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@lab.ru\",\n  \"password\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/login",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "login"]
+            },
+            "description": "POST аутентификация (заглушка для 4ой лабораторной)"
+          }
+        },
+        {
+          "name": "POST деавторизация (заглушка для 4ой лабораторной)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/logout",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "logout"]
+            },
+            "description": "POST деавторизация (заглушка для 4ой лабораторной)"
+          }
+        }
+      ]
+    }
+  ]
+}

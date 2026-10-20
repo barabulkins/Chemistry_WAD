@@ -1,114 +1,230 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Веб-сервис управления химическими образцами (Лабораторная работа №3)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Данный проект представляет собой RESTful веб-сервис, разработанный на базе фреймворка **NestJS** (Node.js + TypeScript) с реляционной базой данных **PostgreSQL** (TypeORM) и объектным хранилищем медиафайлов **MinIO S3**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 1. Архитектура и технологии
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Бэкенд:** NestJS (TypeScript, Express)
+- **База данных:** PostgreSQL (реляционная СУБД)
+- **ORM:** TypeORM (Data Mapper / Active Record паттерны, поддержка сырых SQL-курсоров)
+- **Объектное S3-хранилище:** MinIO (хранение изображений и коротких видеороликов)
+- **Загрузка файлов:** Multer (`FileFieldsInterceptor`, обработка `multipart/form-data`)
+- **Паттерн Singleton:** `CurrentUser` (хранит текущего авторизованного пользователя с `userId = 1` для демонстрации бизнес-логики ЛР3 до внедрения JWT в ЛР4)
+- **Тестирование API:** Insomnia / Postman (`insomnia_collection.json`)
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 2. Описание таблиц базы данных
+
+В проекте используется реляционная база данных со строгими внешними ключами (`Foreign Keys`) и связями.
+
+```
+       ┌────────────────────────┐
+       │         users          │
+       ├────────────────────────┤
+       │ id (PK)                │◄───────┐
+       │ username               │        │
+       │ email (UNIQUE)         │        │
+       │ password               │        │
+       └────────────────────────┘        │
+                   │ 1                   │ 1
+                   │                     │
+                   ▼ M                   │
+       ┌────────────────────────┐        │
+       │    chemical_samples    │        │
+       ├────────────────────────┤        │
+       │ id (PK)                │        │
+       │ title                  │        │
+       │ description            │        │
+       │ status (draft/pub/del) │        │
+       │ image_url              │        │
+       │ video_url              │        │
+       │ impurities_percent     │        │
+       │ gas_volume             │        │
+       │ created_at             │        │
+       │ formation_date         │        │
+       │ creator_id (FK)────────┘        │
+       └────────────────────────┘        │
+                   │ 1                   │
+                   │                     │
+                   ▼ M                   ▼ M
+       ┌────────────────────────────────────┐
+       │            sample_likes            │
+       ├────────────────────────────────────┤
+       │ id (PK)                            │
+       │ user_id (FK -> users.id)           │
+       │ sample_id (FK -> samples.id)       │
+       └────────────────────────────────────┘
 ```
 
-## Compile and run the project
+### 2.1. Таблица `users` (Пользователи)
+Хранит учетные записи пользователей системы.
+| Поле | Тип данных | Ограничения | Описание |
+|---|---|---|---|
+| `id` | `INTEGER` | PRIMARY KEY, SERIAL | Уникальный идентификатор пользователя |
+| `username` | `VARCHAR(255)` | NOT NULL | Имя / логин пользователя |
+| `email` | `VARCHAR(255)` | NOT NULL, UNIQUE | Электронная почта (логин для входа) |
+| `password` | `VARCHAR(255)` | NOT NULL | Пароль пользователя |
 
-```bash
-# development
-$ npm run start
+### 2.2. Таблица `chemical_samples` (Химические образцы / Услуги)
+Основная сущность предметной области.
+| Поле | Тип данных | Ограничения | Описание |
+|---|---|---|---|
+| `id` | `INTEGER` | PRIMARY KEY, SERIAL | Уникальный идентификатор образца |
+| `title` | `VARCHAR(255)` | NOT NULL | Название химического образца |
+| `description` | `TEXT` | NULL | Описание свойств и характеристик |
+| `status` | `VARCHAR(20)` | DEFAULT `'draft'` | Статус: `draft` (черновик), `published` (опубликован), `deleted` (удален) |
+| `image_url` | `TEXT` | NOT NULL | Ссылка на изображение образца в хранилище MinIO |
+| `video_url` | `TEXT` | NOT NULL | Ссылка на короткое видео образца в MinIO |
+| `impurities_percent`| `DECIMAL(5,2)` | NULL | Массовая доля примесей (%, в 1 кг образца) |
+| `gas_volume` | `INTEGER` | NULL | Объем выделившегося газа (мл из 1 кг) |
+| `created_at` | `TIMESTAMP` | DEFAULT NOW() | Дата и время создания черновика |
+| `formation_date` | `TIMESTAMP` | NULL | Дата и время публикации (заполняется при публикации) |
+| `creator_id` | `INTEGER` | FK (`users.id`) | Внешний ключ: автор/создатель образца |
 
-# watch mode
-$ npm run start:dev
+### 2.3. Таблица `sample_likes` (Лайки образцов)
+Таблица-связка для реализации связи «многие-ко-многим» (M:M) между пользователями и образцами.
+| Поле | Тип данных | Ограничения | Описание |
+|---|---|---|---|
+| `id` | `INTEGER` | PRIMARY KEY, SERIAL | Уникальный идентификатор лайка |
+| `user_id` | `INTEGER` | FK (`users.id`) | Кто поставил лайк |
+| `sample_id` | `INTEGER` | FK (`chemical_samples.id`) | Какой образец лайкнули |
 
-# production mode
-$ npm run start:prod
+---
+
+## 3. Описание методов REST API
+
+Все методы API образцов и пользователей имеют общий префикс `/api`.
+
+### 3.1. Домен Образцов (`/api/samples`)
+
+#### 1. `GET /api/samples` — Список с фильтрацией (только опубликованные)
+- **Назначение:** Получение списка всех опубликованных образцов.
+- **Параметры строки запроса (Query Params):**
+  - `gas_volume` (необязательный, целое число): фильтр по объёму выделившегося газа.
+- **Особенности бизнес-логики:**
+  - Возвращаются только записи со статусом `status = 'published'`.
+  - В каждом объекте возвращается **признак 0/1 (`is_creator`)**:
+    - `is_creator: 1` — если создатель образца совпадает с текущим пользователем (`creator_id === currentUserId`).
+    - `is_creator: 0` — если образец создан другим пользователем.
+  - Поле `likes` содержит итоговое число лайков (длина массива связей в Node.js).
+- **Код ответа:** `200 OK`.
+
+#### 2. `GET /api/samples/feed` — Лента (только опубликованные)
+- **Назначение:** Просмотр опубликованных образцов по одному (формат вертикальной ленты / карточки).
+- **Параметры строки запроса (Query Params):**
+  - `id` (необязательный, число): ID образца, от которого осуществляется навигация.
+  - `next` (необязательный, boolean, например `true`): флаг перехода к следующей записи.
+- **Особенности бизнес-логики и признак 0/1:**
+  - Возвращается **признак 0/1 (`is_liked`)**:
+    - `is_liked: 1` — текущий пользователь поставил лайк данному образцу.
+    - `is_liked: 0` — лайк не поставлен.
+- **Почему лента работает без параметров и как работает с параметрами:**
+  - **Без параметров (`GET /api/samples/feed`):** При первом открытии экрана ленты (холодный старт клиента) клиентское приложение ещё не знает ни одного ID. Поэтому запрос без параметров отдаёт самую первую опубликованную запись (`ORDER BY id ASC LIMIT 1`).
+  - **С параметрами (`GET /api/samples/feed?id=1&next=true`):** Клиент передаёт идентификатор текущей просмотренной карточки и флаг `next=true`. Сервер делает выборку следующей записи (`WHERE id > :id ORDER BY id ASC LIMIT 1`).
+  - **Закольцовывание:** При достижении конца списка следующий запрос с `next=true` автоматически возвращает первую запись, обеспечивая бесконечную ленту.
+- **Код ответа:** `200 OK`.
+
+#### 3. `GET /api/samples/draft` — Получение черновика текущего пользователя
+- **Назначение:** Получение данных текущего черновика для последующего редактирования и публикации.
+- **Особенности:**
+  - Идентификатор (ID) в запросе **не указывается**. Сервер автоматически извлекает черновик текущего пользователя (`creator_id = currentUserId`, `status = 'draft'`).
+  - **Ограничение:** В системе для одного пользователя хранится **не более 1 черновика**.
+- **Код ответа:** `200 OK` (возвращает объект черновика или `null`, если черновика нет).
+
+#### 4. `POST /api/samples` — Добавление черновика + файлов медиа в MinIO
+- **Назначение:** Первичная инициализация образца с загрузкой медиафайлов.
+- **Формат запроса:** `multipart/form-data`.
+- **Поля формы:**
+  - `title` (строка, **обязательное**): название образца.
+  - `image` (файл, **обязательное**): файл изображения.
+  - `video` (файл, **обязательное**): файл короткого видео.
+- **Валидация файлов:**
+  - Если файл изображения (`image`) или видео (`video`) не выбран или отсутствует в запросе — сервер прерывает операцию и возвращает `400 Bad Request` с понятным текстом ошибки (`"Необходимо выбрать файл изображения (поле \"image\")"`).
+  - Если у пользователя уже есть незавершённый черновик — сервер возвращает `400 Bad Request` с требованием сначала опубликовать или удалить имеющийся черновик.
+- **Хранение в MinIO:**
+  - Файлы загружаются в S3 бакет `chemistry1`.
+  - Имена файлов генерируются **строго на латинице** с префиксом и UUID (`img_<uuid>.<ext>`, `vid_<uuid>.<ext>`), исключая коллизии и проблемы с кодировками.
+  - В базе данных в полях `image_url` и `video_url` сохраняются полные URL-адреса загруженных объектов (`http://127.0.0.1:9000/chemistry1/...`).
+- **Код ответа:** `201 Created`.
+
+#### 5. `PUT /api/samples/publish` — Публикация черновика
+- **Назначение:** Перевод черновика в статус опубликованного с заполнением характеристик.
+- **Формат тела:** `application/json`.
+- **Поля тела запроса:**
+  - `title` (строка, опционально): скорректированное название.
+  - `description` (строка): подробное описание образца.
+  - `impurities_percent` (число): массовая доля примесей.
+  - `gas_volume` (число): объём газа.
+- **Бизнес-логика:**
+  - Находит черновик текущего пользователя.
+  - Меняет статус `draft` → `published`.
+  - Устанавливает системное поле даты публикации `formation_date = NOW()`.
+- **Код ответа:** `200 OK`.
+
+#### 6. `DELETE /api/samples/:id` — Логическое удаление (Soft Delete)
+- **Назначение:** Удаление образца владельцем.
+- **Правило доступа:** Удалять разрешено **только образцы текущего пользователя** (`creator_id = currentUserId`). Чужой образец удалить нельзя (возвращается `404 Not Found`).
+- **Реализация через SQL-курсор:**
+  - Выполняется сырая транзакция с объявлением курсора:
+    ```sql
+    DECLARE delete_cursor CURSOR FOR
+      SELECT id FROM chemical_samples 
+      WHERE id = $1 AND creator_id = $2 AND status != 'deleted' 
+      FOR UPDATE;
+    FETCH NEXT FROM delete_cursor;
+    UPDATE chemical_samples SET status = 'deleted' WHERE CURRENT OF delete_cursor;
+    CLOSE delete_cursor;
+    ```
+  - Запись физически остаётся в таблице для истории, но исключается из выборок ленты и каталога благодаря статусу `deleted`.
+- **Код ответа:** `200 OK`.
+
+#### 7. `POST /api/samples/:id/like` — Лайк / отмена лайка
+- **Назначение:** Поставить или снять лайк с образца от имени текущего пользователя.
+- **Формат тела:** `application/json`.
+- **Поле тела запроса:** `value` (0 или 1):
+  - `value: 1` — поставить лайк (создаёт запись в `sample_likes`, если её ещё не было).
+  - `value: 0` — отменить лайк (удаляет запись из `sample_likes`).
+- **Код ответа:** `200 OK`.
+
+---
+
+### 3.2. Домен Пользователь (`/api/users`)
+
+#### 8. `POST /api/users/register` — Регистрация
+- **Формат тела:** `application/json` (`username`, `email`, `password`).
+- **Бизнес-логика:** Валидирует уникальность email в БД, сохраняет нового пользователя.
+- **Код ответа:** `201 Created`.
+
+#### 9. `POST /api/users/login` — Аутентификация (заглушка)
+- **Формат тела:** `application/json` (`email`, `password`).
+- **Назначение:** Заглушка согласно заданию (полноценная авторизация с генерацией токенов реализуется в 4-й лабораторной работе).
+- **Код ответа:** `200 OK`.
+
+#### 10. `POST /api/users/logout` — Деавторизация (заглушка)
+- **Назначение:** Заглушка согласно заданию (инвалидация сессии/токена для 4-й лабораторной работы).
+- **Код ответа:** `200 OK`.
+
+---
+
+## 4. Запуск и проверка проекта
+
+### 4.1. Подготовка окружения
+1. **PostgreSQL:** Убедитесь, что PostgreSQL запущен на порту `5432` с базой `postgres` (пользователь `postgres`, пароль `postgres`).
+2. **MinIO S3:** Запустите локальный сервер MinIO:
+   ```powershell
+   .\minio.exe server .\minio_data --console-address ":9001"
+   ```
+   (Логин по умолчанию: `minioadmin`, Пароль: `minioadmin`).
+
+### 4.2. Запуск приложения NestJS
+```powershell
+npm install
+npm run start:dev
 ```
+Приложение поднимется по адресу: `http://localhost:3000`.
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - Kirsanov Vladimir
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 4.3. Тестирование коллекции Insomnia / Postman
+Импортируйте файл `insomnia_collection.json` в Postman или Insomnia. В коллекции настроены все 10 обязательных запросов.

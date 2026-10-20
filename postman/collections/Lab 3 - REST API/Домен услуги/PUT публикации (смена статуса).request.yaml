@@ -1,0 +1,16 @@
+$kind: http-request
+description: PUT публикации (смена статуса)
+url: localhost:3000/api/samples/publish
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "title": "Опубликованный гранит",
+      "description": "Добавлено подробное описание минерального состава.",
+      "gas_volume": 25,
+      "impurities_percent": 3.5
+    }
+order: 5000
