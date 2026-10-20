@@ -263,65 +263,6 @@ export class ChemicalSamplesService {
     }
   }
 
-  // ─── Для фронтенда (плитка + черновик + лента) ───
-  async findAllForTile(gasVolume?: number) {
-    const qb = this.sampleRepo
-      .createQueryBuilder('s')
-      .leftJoinAndSelect('s.likes', 'l')
-      .where('s.status != :deleted', { deleted: 'deleted' });
-
-    if (gasVolume !== undefined && gasVolume !== null) {
-      qb.andWhere('s.gas_volume = :vol', { vol: gasVolume });
-    }
-    qb.orderBy('s.id', 'ASC');
-    const entities = await qb.getMany();
-
-    return entities.map((e) => ({
-      ...this.serializeSample(e),
-      isDraft: e.status === 'draft',
-    }));
-  }
-
-  async findDraftByUser(userId: number) {
-    return this.sampleRepo.findOne({ where: { creator_id: userId, status: 'draft' } });
-  }
-
-  async findOneForFeed(id?: number, next?: boolean) {
-    return this.findFeed(id, next);
-  }
-
-  async createDraftFrontend(userId: number, title: string) {
-    const sample = this.sampleRepo.create({
-      title,
-      status: 'draft',
-      creator_id: userId,
-      created_at: new Date(),
-    });
-    return this.sampleRepo.save(sample);
-  }
-
-  async publishDraftFrontend(
-    userId: number,
-    title: string,
-    description: string,
-    impuritiesPercent: number,
-    gasVolume: number,
-  ) {
-    const draft = await this.sampleRepo.findOne({ where: { creator_id: userId, status: 'draft' } });
-    if (!draft) return null;
-    if (title) draft.title = title;
-    draft.description = description;
-    draft.impurities_percent = impuritiesPercent;
-    draft.gas_volume = gasVolume;
-    draft.status = 'published';
-    draft.formation_date = new Date();
-    return this.sampleRepo.save(draft);
-  }
-
-  async deleteSampleRaw(sampleId: number) {
-    return this.deleteSample(sampleId);
-  }
-
   // ─── Регистрация пользователя ───
   async registerUser(username: string, email: string, password: string) {
     if (!username || !username.trim()) {
