@@ -286,25 +286,25 @@ export class ApiSamplesController {
   })
   async publish(
     @CurrentUser() user: CurrentUserData,
-    @Body() dto: PublishSampleDto,
+    @Body() dto?: PublishSampleDto,
   ): Promise<SampleResponseDto> {
     const imp =
-      dto.impurities_percent !== undefined &&
-      dto.impurities_percent !== null &&
-      String(dto.impurities_percent) !== ''
+      dto?.impurities_percent !== undefined &&
+      dto?.impurities_percent !== null &&
+      String(dto?.impurities_percent) !== ''
         ? parseFloat(String(dto.impurities_percent))
         : undefined;
     const gas =
-      dto.gas_volume !== undefined &&
-      dto.gas_volume !== null &&
-      String(dto.gas_volume) !== ''
+      dto?.gas_volume !== undefined &&
+      dto?.gas_volume !== null &&
+      String(dto?.gas_volume) !== ''
         ? parseInt(String(dto.gas_volume), 10)
         : undefined;
 
     return this.service.publishDraft(
       user.userId,
-      dto.title,
-      dto.description,
+      dto?.title,
+      dto?.description,
       imp,
       gas,
     );
