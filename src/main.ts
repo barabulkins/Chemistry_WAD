@@ -5,6 +5,8 @@ import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import { RedisStore } from 'connect-redis';
+import { createClient } from 'redis';
 
 const hbs = require('hbs');
 
@@ -26,9 +28,27 @@ async function bootstrap() {
   // Подключение cookie-parser
   app.use(cookieParser());
 
-  // Подключение серверных сессий и куки (Требование ЛР4 для NestJS)
+  // Подключение Redis для хранения сессий (Требование ЛР4: показать пользователя в Redis)
+  let sessionStore: any = undefined;
+  try {
+    const redisClient = createClient({
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
+    });
+    redisClient.on('error', (err) => console.warn('Redis error:', err.message));
+    await redisClient.connect();
+    sessionStore = new RedisStore({
+      client: redisClient,
+      prefix: 'sess:',
+    });
+    console.log('Redis connected successfully: sessions are stored in Redis (port 6379)!');
+  } catch (err: any) {
+    console.warn('Redis connection failed, fallback to memory store:', err.message);
+  }
+
+  // Подключение серверных сессий и куки (Требование ЛР4 для NestJS + Redis)
   app.use(
     session({
+      store: sessionStore,
       name: 'connect.sid',
       secret: process.env.SESSION_SECRET || 'rip_chemistry_super_secret_session_key_2026',
       resave: false,
