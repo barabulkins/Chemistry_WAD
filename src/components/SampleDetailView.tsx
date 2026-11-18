@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Sample } from '../types/sample';
+import { resolveImageUrl } from '../utils/mediaUrl';
 import { DEFAULT_IMAGE } from '../constants/assets';
 
 interface SampleDetailViewProps {
@@ -8,7 +9,7 @@ interface SampleDetailViewProps {
 }
 
 export const SampleDetailView: React.FC<SampleDetailViewProps> = ({ sample, onWatchInFeed }) => {
-  const imageSrc = sample.image_url || DEFAULT_IMAGE;
+  const imageSrc = resolveImageUrl(sample.image_url) || DEFAULT_IMAGE;
 
   return (
     <div className="content-area add-page">
@@ -35,15 +36,15 @@ export const SampleDetailView: React.FC<SampleDetailViewProps> = ({ sample, onWa
           </div>
           <div className="form-group">
             <label>Описание</label>
-            <textarea className="form-control" rows={3} readOnly value={sample.description} />
+            <textarea className="form-control" rows={3} readOnly value={sample.description || ''} />
           </div>
           <div className="form-group">
             <label>Массовая доля примесей (%, в 1 кг образца)</label>
-            <input type="number" step="0.1" className="form-control" readOnly value={sample.impurities_percent} />
+            <input type="number" step="0.1" className="form-control" readOnly value={sample.impurities_percent ?? 0} />
           </div>
           <div className="form-group">
             <label>Выделившийся газ (мл из 1 кг)</label>
-            <input type="number" className="form-control" readOnly value={sample.gas_volume} />
+            <input type="number" className="form-control" readOnly value={sample.gas_volume ?? 0} />
           </div>
         </div>
 

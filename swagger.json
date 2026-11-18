@@ -1,0 +1,1018 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/technical-samples": {
+      "get": {
+        "operationId": "ChemicalSamplesController_getAll",
+        "parameters": [
+          {
+            "name": "gas_volume",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/technical-samples/draft": {
+      "get": {
+        "operationId": "ChemicalSamplesController_getDraft",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      },
+      "post": {
+        "operationId": "ChemicalSamplesController_createDraft",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/technical-samples/feed": {
+      "get": {
+        "operationId": "ChemicalSamplesController_getFeed[0]",
+        "parameters": [
+          {
+            "name": "next",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/technical-samples/feed/{id}": {
+      "get": {
+        "operationId": "ChemicalSamplesController_getFeed[1]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "next",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/technical-samples/publish": {
+      "post": {
+        "operationId": "ChemicalSamplesController_publishDraft",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/technical-samples/{id}/delete": {
+      "post": {
+        "operationId": "ChemicalSamplesController_deleteSample",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ChemicalSamples"
+        ]
+      }
+    },
+    "/api/samples": {
+      "get": {
+        "description": "Получение всех услуг (химических образцов) аналитической лаборатории. Доступно всем посетителям без авторизации. Если пользователь авторизован, признаки is_creator и is_liked вычисляются для него; для гостя возвращаются нули (0).",
+        "operationId": "ApiSamplesController_getAll",
+        "parameters": [
+          {
+            "name": "gas_volume",
+            "required": false,
+            "in": "query",
+            "description": "Фильтрация по объёму выделившегося газа (мл)",
+            "schema": {
+              "example": 45,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список опубликованных образцов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SampleResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET получение всех услуг (каталог опубликованных образцов)",
+        "tags": [
+          "ApiSamples",
+          "Публичные методы (Чтение — без авторизации)"
+        ]
+      },
+      "post": {
+        "description": "Инициализирует новый черновик химического образца. creator_id АВТОМАТИЧЕСКИ заполняется из сессии текущего пользователя! Файлы изображения и видео загружаются в S3 хранилище MinIO. Требует авторизации.",
+        "operationId": "ApiSamplesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSampleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Черновик успешно создан с автозаполнением автора",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не заполнены обязательные файлы или уже есть активный черновик"
+          },
+          "401": {
+            "description": "Не авторизован (гость не имеет права создавать)"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Создание нового черновика услуги с автозаполнением создателя",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/samples/feed": {
+      "get": {
+        "description": "Режим постраничного просмотра карточек ленты с закольцовыванием. Без параметров возвращает первый образец. С параметрами ?id=X&next=true возвращает следующий. Доступно без авторизации.",
+        "operationId": "ApiSamplesController_getFeed[0]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "ID текущего образца для отсчета",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "Флаг \"true\" для перехода к следующей карточке ленты",
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Данные карточки образца",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Лента опубликованных образцов (по одной карточке)",
+        "tags": [
+          "ApiSamples",
+          "Публичные методы (Чтение — без авторизации)"
+        ]
+      }
+    },
+    "/api/samples/feed/{id}": {
+      "get": {
+        "description": "Режим постраничного просмотра карточек ленты с закольцовыванием. Без параметров возвращает первый образец. С параметрами ?id=X&next=true возвращает следующий. Доступно без авторизации.",
+        "operationId": "ApiSamplesController_getFeed[1]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "Флаг \"true\" для перехода к следующей карточке ленты",
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Данные карточки образца",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Лента опубликованных образцов (по одной карточке)",
+        "tags": [
+          "ApiSamples",
+          "Публичные методы (Чтение — без авторизации)"
+        ]
+      }
+    },
+    "/api/samples/creator/draft": {
+      "get": {
+        "description": "Возвращает активный черновик текущего пользователя для редактирования и последующей публикации. Доступно только авторизованному создателю.",
+        "operationId": "ApiSamplesController_getDraft",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Активный черновик или null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Не авторизован (гость не имеет доступа)"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Получение текущего черновика авторизованного создателя",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/samples/draft": {
+      "get": {
+        "description": "Возвращает активный черновик текущего пользователя (синоним creator/draft). Требует авторизации.",
+        "operationId": "ApiSamplesController_getDraftLegacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Не авторизован"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Получение черновика текущего создателя (алиас)",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/samples/{id}": {
+      "get": {
+        "description": "Возвращает подробные характеристики конкретного опубликованного химического образца. Доступно без авторизации.",
+        "operationId": "ApiSamplesController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор образца",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Данные образца",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Образец не найден или не опубликован"
+          }
+        },
+        "summary": "Детальный просмотр опубликованного образца по ID",
+        "tags": [
+          "ApiSamples",
+          "Публичные методы (Чтение — без авторизации)"
+        ]
+      },
+      "delete": {
+        "description": "Логически удаляет образец (status = deleted) с использованием SQL-курсора FOR UPDATE в транзакции. Удалить разрешено ТОЛЬКО собственный образец создателя (creator_id == session.userId). Требует авторизации.",
+        "operationId": "ApiSamplesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID удаляемого химического образца",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Образец успешно удален",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSampleResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Не авторизован"
+          },
+          "404": {
+            "description": "Образец не найден или принадлежит другому автору"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Логическое удаление образца (Soft Delete через курсор SQL)",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/samples/publish": {
+      "put": {
+        "description": "Переводит черновик текущего авторизованного пользователя из статуса \"draft\" в \"published\", фиксирует дату публикации formation_date = NOW() и параметры образца. Требует авторизации.",
+        "operationId": "ApiSamplesController_publish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishSampleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Образец успешно опубликован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Не авторизован"
+          },
+          "404": {
+            "description": "Черновик для публикации не найден"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Публикация черновика текущего создателя",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/samples/{id}/like": {
+      "post": {
+        "description": "Ставит (value=1) или снимает (value=0) отметку \"нравится\" от имени текущего авторизованного пользователя. Требует авторизации.",
+        "operationId": "ApiSamplesController_like",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID образца",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleLikeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Результат операции лайка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleLikeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректное значение value (должно быть 0 или 1)"
+          },
+          "401": {
+            "description": "Не авторизован"
+          },
+          "404": {
+            "description": "Образец не найден"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Поставить / отменить лайк образцу",
+        "tags": [
+          "ApiSamples",
+          "Методы создателя (Защищенные — с авторизацией)"
+        ]
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "description": "Создает нового пользователя с защищенным хэшированием пароля (bcrypt) и автоматически выполняет вход, создавая серверную сессию и устанавливая сессионную куку connect.sid.",
+        "operationId": "ApiUsersController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно зарегистрирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные или email уже занят"
+          }
+        },
+        "summary": "Регистрация нового пользователя",
+        "tags": [
+          "Аутентификация и пользователи"
+        ]
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "description": "Проверяет адрес электронной почты и пароль. При успехе создает серверную сессию и возвращает сессионный cookie connect.sid. Все последующие запросы от имени создателя будут авторизованы.",
+        "operationId": "ApiUsersController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешная авторизация, сессия создана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный логин или пароль"
+          }
+        },
+        "summary": "Аутентификация пользователя (Вход)",
+        "tags": [
+          "Аутентификация и пользователи"
+        ]
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "description": "Уничтожает активную серверную сессию и удаляет идентификационную куку connect.sid у клиента.",
+        "operationId": "ApiUsersController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Успешный выход из системы",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Деавторизация пользователя (Выход)",
+        "tags": [
+          "Аутентификация и пользователи"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "description": "Возвращает идентификатор и контактные данные пользователя из активной сессии. Без авторизации возвращает 401 Unauthorized.",
+        "operationId": "ApiUsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Данные текущего пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          }
+        },
+        "security": [
+          {
+            "connect.sid": []
+          }
+        ],
+        "summary": "Получение профиля текущего авторизованного пользователя",
+        "tags": [
+          "Аутентификация и пользователи"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Управление химическими образцами — Веб-сервис (ЛР4)",
+    "description": "",
+    "version": "4.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "SampleResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Идентификатор образца",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "Название образца",
+            "example": "Известняк"
+          },
+          "description": {
+            "type": "string",
+            "description": "Описание образца",
+            "example": "Технический образец..."
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус образца",
+            "example": "published",
+            "enum": [
+              "draft",
+              "published",
+              "deleted"
+            ]
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Ссылка на изображение в MinIO S3",
+            "example": "http://127.0.0.1:9000/chemistry1/img_123.jpg"
+          },
+          "video_url": {
+            "type": "string",
+            "description": "Ссылка на видео в MinIO S3",
+            "example": "http://127.0.0.1:9000/chemistry1/vid_123.mp4"
+          },
+          "impurities_percent": {
+            "type": "number",
+            "description": "Массовая доля примесей (%)",
+            "example": 15.5
+          },
+          "gas_volume": {
+            "type": "number",
+            "description": "Объем выделившегося газа (мл)",
+            "example": 45
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания записи",
+            "example": "2026-10-21T00:00:00.000Z"
+          },
+          "formation_date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата публикации образца",
+            "example": "2026-10-21T01:00:00.000Z"
+          },
+          "likes": {
+            "type": "number",
+            "description": "Общее количество лайков",
+            "example": 5
+          },
+          "is_creator": {
+            "type": "number",
+            "description": "Признак (0/1): является ли текущий пользователь автором образца (0 для гостя)",
+            "example": 1
+          },
+          "is_liked": {
+            "type": "number",
+            "description": "Признак (0/1): поставил ли текущий пользователь лайк данному образцу (0 для гостя)",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "image_url",
+          "video_url",
+          "created_at",
+          "likes",
+          "is_creator",
+          "is_liked"
+        ]
+      },
+      "CreateSampleDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Название химического образца",
+            "example": "Сульфат меди (II)"
+          },
+          "image": {
+            "type": "string",
+            "description": "Файл изображения образца (.jpg, .png)",
+            "format": "binary"
+          },
+          "video": {
+            "type": "string",
+            "description": "Файл короткого видео демонстрации образца (.mp4)",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "title",
+          "image",
+          "video"
+        ]
+      },
+      "PublishSampleDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Уточненное название образца",
+            "example": "Металлический цинк высшей пробы"
+          },
+          "description": {
+            "type": "string",
+            "description": "Подробное описание свойств, условий хранения и испытаний",
+            "example": "Высокочистый кристаллический образец. При взаимодействии с соляной кислотой бурно выделяет водород."
+          },
+          "impurities_percent": {
+            "type": "number",
+            "description": "Массовая доля примесей (%, в 1 кг)",
+            "example": 1.25
+          },
+          "gas_volume": {
+            "type": "number",
+            "description": "Объем выделившегося газа (мл из 1 кг)",
+            "example": 350
+          }
+        }
+      },
+      "DeleteSampleResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение об удалении",
+            "example": "Образец успешно удалён (soft delete)"
+          },
+          "id": {
+            "type": "number",
+            "description": "Идентификатор удаленного образца",
+            "example": 1
+          }
+        },
+        "required": [
+          "message",
+          "id"
+        ]
+      },
+      "ToggleLikeDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Действие с лайком: 1 — поставить лайк, 0 — снять лайк",
+            "example": 1,
+            "enum": [
+              0,
+              1
+            ]
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "ToggleLikeResponseDto": {
+        "type": "object",
+        "properties": {
+          "liked": {
+            "type": "number",
+            "description": "Текущий статус лайка пользователя (0 или 1)",
+            "example": 1
+          },
+          "message": {
+            "type": "string",
+            "description": "Сообщение о результате",
+            "example": "Лайк успешно поставлен"
+          }
+        },
+        "required": [
+          "liked",
+          "message"
+        ]
+      },
+      "RegisterUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя (логин)",
+            "example": "lab_chemist"
+          },
+          "email": {
+            "type": "string",
+            "description": "Адрес электронной почты (уникальный логин)",
+            "example": "chemist@lab.ru"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя",
+            "example": "securePassword123"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password"
+        ]
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Идентификатор пользователя",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "lab_chemist"
+          },
+          "email": {
+            "type": "string",
+            "description": "Электронная почта",
+            "example": "chemist@lab.ru"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email"
+        ]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Адрес электронной почты пользователя",
+            "example": "chemist@lab.ru"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя",
+            "example": "securePassword123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение о результате авторизации",
+            "example": "Успешная авторизация"
+          },
+          "user": {
+            "description": "Данные авторизованного пользователя",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserProfileDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "user"
+        ]
+      },
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Информационное сообщение",
+            "example": "Успешный выход из системы"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    }
+  }
+}

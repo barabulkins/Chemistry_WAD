@@ -1,60 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import type { Sample, SampleFilterOptions } from './types/sample';
-import { fetchSamples, fetchFeedSample } from './services/sampleService';
+import React, { useState, useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from './store';
+import {
+  fetchChemicalSamples,
+  fetchChemicalFeedSample,
+  setSelectedSample,
+} from './store/slices/samplesSlice';
+import type { NavigationTab } from './components/BottomNav';
+import { TopHeader } from './components/TopHeader';
 import { BottomNav } from './components/BottomNav';
 import { TileView } from './components/TileView';
 import { FeedView } from './components/FeedView';
+import { AddSampleView } from './components/AddSampleView';
+import { AuthView } from './components/AuthView';
 import { SampleDetailView } from './components/SampleDetailView';
+import { BlockingLoader } from './components/BlockingLoader';
 
 export const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'feed' | 'tile' | 'details'>('tile');
-  const [samples, setSamples] = useState<Sample[]>([]);
-  const [feedSample, setFeedSample] = useState<Sample | null>(null);
-  const [selectedSample, setSelectedSample] = useState<Sample | null>(null);
+  const dispatch = useAppDispatch();
+  const [currentView, setCurrentView] = useState<NavigationTab | 'details'>('tile');
 
-  const [filters, setFilters] = useState<SampleFilterOptions>({
-    searchQuery: '',
-    gasVolumeMin: 0
-  });
+  const { feedSample, selectedSample, items } = useAppSelector((state) => state.samples);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    loadCatalog();
-  }, []);
+    dispatch(fetchChemicalSamples(undefined));
+    dispatch(fetchChemicalFeedSample({ next: false }));
+  }, [dispatch]);
 
-  useEffect(() => {
-    loadFeed();
-  }, []);
-
-  const loadCatalog = useCallback(async (volume?: number) => {
-    const data = await fetchSamples(volume);
-    setSamples(data);
-  }, []);
-
-  const loadFeed = useCallback(async (id?: number, next: boolean = false) => {
-    const data = await fetchFeedSample(id, next);
-    setFeedSample(data);
-  }, []);
-
-  const handleApplyServerFilter = useCallback(() => {
-    loadCatalog(filters.gasVolumeMin);
-  }, [loadCatalog, filters.gasVolumeMin]);
-
-  const handleChangeFilter = useCallback(<K extends keyof SampleFilterOptions>(key: K, value: SampleFilterOptions[K]) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const handleOpenPassport = () => {
+    if (selectedSample) {
+      setCurrentView('details');
+    } else if (items.length > 0) {
+      dispatch(setSelectedSample(items[0]));
+      setCurrentView('details');
+    }
+  };
 
   return (
     <div className="app-container">
+      {/* Блокирующая анимация запросов */}
+      <BlockingLoader />
+
+      {/* Верхний заголовок из ЛР5 */}
+      <TopHeader
+        currentView={currentView}
+        onOpenAbout={handleOpenPassport}
+        onBackToGrid={() => setCurrentView('tile')}
+        isAuthenticated={isAuthenticated}
+        username={user?.username}
+      />
+
+      {/* Основная рабочая область */}
       {currentView === 'tile' && (
         <TileView
-          samples={samples}
-          filters={filters}
-          onChangeFilter={handleChangeFilter}
-          onApplyServerFilter={handleApplyServerFilter}
           onSelectSample={(sample) => {
-            setSelectedSample(sample);
-            loadFeed(sample.id, false);
-            setCurrentView('feed');
+            dispatch(setSelectedSample(sample));
+            setCurrentView('details');
           }}
         />
       )}
@@ -62,22 +63,34 @@ export const App: React.FC = () => {
       {currentView === 'feed' && (
         <FeedView
           sample={feedSample}
-          onNextSample={() => loadFeed(feedSample?.id, true)}
+          onNextSample={() => dispatch(fetchChemicalFeedSample({ id: feedSample?.id, next: true }))}
         />
       )}
 
-      {currentView === 'details' && selectedSample && (
+      {currentView === 'add' && (
+        <AddSampleView
+          onSuccessNavigateToTile={() => setCurrentView('tile')}
+          onNavigateToAuth={() => setCurrentView('auth')}
+        />
+      )}
+
+      {currentView === 'auth' && (
+        <AuthView onSuccessNavigateToTile={() => setCurrentView('tile')} />
+      )}
+
+      {currentView === 'details' && (selectedSample || items[0]) && (
         <SampleDetailView
-          sample={selectedSample}
+          sample={selectedSample || items[0]}
           onWatchInFeed={(id) => {
-            loadFeed(id, false);
+            dispatch(fetchChemicalFeedSample({ id, next: false }));
             setCurrentView('feed');
           }}
         />
       )}
 
+      {/* Нижняя навигационная панель */}
       <BottomNav
-        activeTab={currentView === 'feed' ? 'feed' : 'tile'}
+        activeTab={currentView === 'details' ? 'tile' : currentView}
         onSelectTab={(tab) => setCurrentView(tab)}
       />
     </div>

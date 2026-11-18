@@ -366,6 +366,27 @@ body {
   border-color: var(--hover-border);
 }
 
+.header-btn {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: var(--radius-global);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  transition: color 0.3s, border-color 0.3s;
+}
+.header-btn:hover {
+  color: var(--hover-border) !important;
+  border-color: var(--hover-border) !important;
+  background: transparent !important;
+}
+
 .cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

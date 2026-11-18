@@ -1,6 +1,9 @@
 import React from 'react';
 import type { Sample } from '../types/sample';
+import { resolveImageUrl, resolveVideoUrl } from '../utils/mediaUrl';
 import { DEFAULT_IMAGE, DEFAULT_VIDEO } from '../constants/assets';
+import { useAppDispatch, useAppSelector } from '../store';
+import { toggleChemicalSampleLike, deleteChemicalSample } from '../store/slices/samplesSlice';
 
 interface FeedViewProps {
   sample: Sample | null;
@@ -8,6 +11,9 @@ interface FeedViewProps {
 }
 
 export const FeedView: React.FC<FeedViewProps> = ({ sample, onNextSample }) => {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
   if (!sample) {
     return (
       <div className="content-area feed-container">
@@ -16,13 +22,29 @@ export const FeedView: React.FC<FeedViewProps> = ({ sample, onNextSample }) => {
     );
   }
 
-  const videoSrc = sample.video_url && sample.video_url.trim() !== ''
-    ? sample.video_url
-    : DEFAULT_VIDEO;
+  const videoSrc = resolveVideoUrl(sample.video_url) || DEFAULT_VIDEO;
+  const posterSrc = resolveImageUrl(sample.image_url) || DEFAULT_IMAGE;
 
-  const posterSrc = sample.image_url && sample.image_url.trim() !== ''
-    ? sample.image_url
-    : DEFAULT_IMAGE;
+  const handleLike = () => {
+    if (!isAuthenticated) {
+      alert('Для выставления отметки "Нравится" необходимо войти в систему!');
+      return;
+    }
+    const nextVal = sample.is_liked === 1 ? 0 : 1;
+    dispatch(toggleChemicalSampleLike({ id: sample.id, value: nextVal }));
+  };
+
+  const handleDelete = () => {
+    if (!isAuthenticated) return;
+    const confirmed = window.confirm(`Удалить образец "${sample.title}"?`);
+    if (confirmed) {
+      dispatch(deleteChemicalSample(sample.id)).then(() => {
+        onNextSample();
+      });
+    }
+  };
+
+  const canDelete = sample.is_creator === 1;
 
   return (
     <div className="content-area feed-container">
@@ -47,7 +69,7 @@ export const FeedView: React.FC<FeedViewProps> = ({ sample, onNextSample }) => {
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
           >
             {sample.title} 🔥 {sample.description}
@@ -67,23 +89,50 @@ export const FeedView: React.FC<FeedViewProps> = ({ sample, onNextSample }) => {
             <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
             <path d="M2 12h20" />
           </svg>
-          <span className="count">{sample.impurities_percent}%</span>
+          <span className="count">{sample.impurities_percent ?? 0}%</span>
         </div>
         <div className="action-btn" title="Объем газа (мл из 1 кг)">
           <svg className="icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12h20" />
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
-          <span className="count">{sample.gas_volume} мл</span>
+          <span className="count">{sample.gas_volume ?? 0} мл</span>
         </div>
 
         {/* Иконка лайка */}
-        <div className="action-btn">
-          <svg className="icon" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+        <div
+          className="action-btn"
+          onClick={handleLike}
+          style={{ cursor: 'pointer' }}
+          title={sample.is_liked === 1 ? 'Снять лайк' : 'Поставить лайк'}
+        >
+          <svg
+            className={`icon ${sample.is_liked === 1 ? 'filled' : ''}`}
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill={sample.is_liked === 1 ? 'var(--hover-border)' : 'white'}
+            stroke={sample.is_liked === 1 ? 'var(--hover-border)' : 'white'}
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
           <span className="count">{sample.likes}</span>
         </div>
+
+        {/* Кнопка удаления для автора */}
+        {canDelete && (
+          <div
+            className="action-btn"
+            onClick={handleDelete}
+            style={{ cursor: 'pointer' }}
+            title="Удалить услугу"
+          >
+            <span style={{ fontSize: '20px' }}>🗑️</span>
+          </div>
+        )}
 
         {/* Кнопка следующий образец */}
         <button
